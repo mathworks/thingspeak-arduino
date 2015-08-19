@@ -106,6 +106,8 @@
 #define FIELDNUM_MAX 8
 #define FIELDLENGTH_MAX 255  // Max length for a field in ThingSpeak is 255 bytes (UTF-8)
 
+#define TIMEOUT_MS_SERVERRESPONSE 5000  // Wait up to five seconds for server to respond
+
 #define OK_SUCCESS              200     // OK / Success
 #define ERR_BADAPIKEY           400     // Incorrect API key (or invalid ThingSpeak server address)
 #define ERR_BADURL              404     // Incorrect API key (or invalid ThingSpeak server address)
@@ -115,6 +117,7 @@
 #define ERR_CONNECT_FAILED      -301    // Failed to connect to ThingSpeak
 #define ERR_UNEXPECTED_FAIL     -302    // Unexpected failure during write to ThingSpeak
 #define ERR_BAD_RESPONSE        -303    // Unable to parse response
+#define ERR_TIMEOUT             -304    // Timeout waiting for server to respond
 #define ERR_NOT_INSERTED        -401    // Point was not inserted (most probable cause is the rate limit of once every 15 seconds)
 
 /**
@@ -1193,6 +1196,7 @@ class ThingSpeakClass
 	 *  * -301: Failed to connect to ThingSpeak
 	 *  * -302: Unexpected failure during write to ThingSpeak
 	 *  * -303: Unable to parse response
+     *  * -304: Timeout waiting for server to respond
 	 *  * -401: Point was not inserted (most probable cause is the rate limit of once every 15 seconds)
 	 * @remark The read functions will return zero or empty if there is an error.  Use this function to retrieve the details.
 	 * @code
@@ -1366,6 +1370,16 @@ private:
 
 	int getHTTPResponse(String & response)
 	{
+        long startWaitForResponseAt = millis();
+        while(client->available() == 0 && millis() - startWaitForResponseAt < TIMEOUT_MS_SERVERRESPONSE)
+        {
+            delay(100);
+        }
+        if(client->available() == 0)
+        {
+			return ERR_TIMEOUT; // Didn't get server response in time
+        }
+
 		if(!client->find(const_cast<char *>("HTTP/1.1")))
 		{
 			#ifdef PRINT_HTTP
