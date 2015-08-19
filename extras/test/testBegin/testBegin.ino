@@ -17,7 +17,8 @@
 
 #include <ArduinoUnit.h>
 
-#ifdef ARDUINO_AVR_YUN#include <SPI.h>
+#ifdef ARDUINO_AVR_YUN
+  #include <SPI.h>
   #include "YunClient.h"
   YunClient client;
 #else
@@ -37,20 +38,20 @@ test(beginCase)
 {
   assertTrue(ThingSpeak.begin(client));
 
-  assertTrue(ThingSpeak.begin(client,IPAddress(1,2,3,4)));
+  assertTrue(ThingSpeak.begin(client,IPAddress(1,2,3,4),80));
 
-  assertTrue(ThingSpeak.begin(client,"www.mathworks.com"));
+  assertTrue(ThingSpeak.begin(client,"www.mathworks.com",80));
 }
 
 
 test(badAddresses) 
 {
   // Test for valid, but incorrect, URL (en.wikipedia.org) that gives a 404 response
-  assertTrue(ThingSpeak.begin(client,"en.wikipedia.org"));
+  assertTrue(ThingSpeak.begin(client,"en.wikipedia.org",80));
   assertEqual(ERR_BADURL, ThingSpeak.writeField(testChannelNumber, 1, (float)1.0, testChannelWriteAPIKey));
   
   // Test for non-existant URL (http://www.iwishthiswebsitewerereal.com/)
-  assertTrue(ThingSpeak.begin(client,"www.iwishthiswebsitewerereal.com"));
+  assertTrue(ThingSpeak.begin(client,"www.iwishthiswebsitewerereal.com",80));
   #ifdef ARDUINO_AVR_YUN
     // Yun gives -301 response
     int badURLResponse = ERR_CONNECT_FAILED;
@@ -61,11 +62,11 @@ test(badAddresses)
   assertEqual(badURLResponse, ThingSpeak.writeField(testChannelNumber, 1, (float)2.0, testChannelWriteAPIKey));
 
   // Test for non-existant IP 192.168.1.234
-  assertTrue(ThingSpeak.begin(client,IPAddress(192,168,1,234)));
+  assertTrue(ThingSpeak.begin(client,IPAddress(192,168,1,234),80));
   assertEqual(-301, ThingSpeak.writeField(testChannelNumber, 1, (float)2.0, testChannelWriteAPIKey));
 
   //Test for bad suburl (badapi.thingspeak.com)
-  assertTrue(ThingSpeak.begin(client,"invalid.thingspeak.com"));
+  assertTrue(ThingSpeak.begin(client,"invalid.thingspeak.com",80));
   assertEqual(badURLResponse, ThingSpeak.writeField(testChannelNumber, 1, (float)4.0, testChannelWriteAPIKey));
 }
 
