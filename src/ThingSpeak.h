@@ -1,17 +1,19 @@
 /*
   ThingSpeak(TM) Communication Library For Arduino
-  
+
+  Enables an Arduino or other compatible hardware to write or read data to or from ThingSpeak,
+  an open data platform for the Internet of Things with MATLAB analytics and visualization. 
+
   ThingSpeak ( https://www.thingspeak.com ) is a free IoT service for building
   systems that collect, analyze, and react to their environments.
   
   Copyright 2015, The MathWorks, Inc.
  
-  See the accompaning licence.txt file for licensing information.
+  See the accompaning licence file for licensing information.
 */
 
 /**
   @mainpage
- * This library enables an Arduino or other compatible hardware to write or read data to or from ThingSpeak, an open data platform for the Internet of Things with MATLAB analytics and visualization. 
  * 
  * \ref ThingSpeakClass "For technical documentation, visit this page"
  * 
@@ -24,22 +26,17 @@
  * Channels may be public, where anyone can see the data, or private, where only the owner and select users can read the data.
  * Each channel has an associated Write API Key that is used to control who can write to a channel.  
  * In addition, private channels have one or more Read API Keys to control who can read from private channel.  
- * An API Key is not required to read from public channels.
+ * An API Key is not required to read from public channels.  Each channel can have up to 8 fields. One field is created by default.
  *
  * You can visualize and do online analytics of your data on ThingSpeak using the built in version of MATLAB, or use the desktop version of MATLAB to get
- * deeper historical insight.  Visit http://www.mathworks.com/iot to learn more.
+ * deeper historical insight.  Visit https://www.mathworks.com/hardware-support/thingspeak.html to learn more.
  * 
- * <h3>Compatible Hardware:</h3>
+ * <h3>Compatible Hardware</h3>
  * * <a href="http://www.arduino.cc">Arduino</a> or compatible using a wired or Wi-Fi ethernet shield (we have tested with <a href="http://www.arduino.cc/en/Main/ArduinoBoardUno">Uno</a> and <a href="http://www.arduino.cc/en/Main/ArduinoBoardMega2560">Mega</a>)
  * * <a href="http://www.arduino.cc/en/Main/ArduinoBoardYun">Arduino Yun</a> running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later.  There are known issues with earlier versions.  Visit [this page](http://www.arduino.cc/en/Main/Software) to get the latest version.
  * * Particle <a href="https://store.particle.io/?product=spark-core">Core</a> or <a href="https://store.particle.io/?product=particle-photon">Photon</a> (Formally Spark)
  * 
- * <h3>Terms Used:</h3>
- * * <b>Public Channel:</b> A channel that can be viewed on <a href="http://thingspeak.com">ThingSpeak</a> with data that can be read by anybody.  Writing requires an API Key.
- * * <b>Private Channel:</b> A channel which only the owner can view and whose data can only be accessed by providing an API Key.
- * * <b>Fields:</b> Each channel can have up to 8 fields. One field is created by default.
- * 
- * <h3>Examples:</h3>
+ * <h3>Examples</h3>
  * The library includes several examples to help you get started.  These are accessible in the Examples/ThingSpeak menu off the File menu in the Arduino IDE.
  * * <b>CheerLights:</b> Reads the latest <a href="http://www.cheerlights.com">CheerLights</a> color on ThingSpeak, and sets an RGB LED.
  * * <b>ReadLastTemperature:</b> Reads the latest temperature from the public <a href="https://thingspeak.com/channels/12397">MathWorks weather station</a> in Natick, MA on ThingSpeak.

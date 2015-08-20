@@ -10,14 +10,17 @@ ThingSpeak stores data in channels. Channels support an unlimited number of time
 
 Channels may be public, where anyone can see the data, or private, where only the owner and select users can read the data. Each channel has an associated Write API Key that is used to control who can write to a channel. In addition, private channels have one or more Read API Keys to control who can read from private channel. An API Key is not required to read from public channels.
 
-You can visualize and do online analytics of your data on ThingSpeak using the built in version of MATLAB, or use the desktop version of MATLAB to get deeper historical insight. Visit http://www.mathworks.com/iot to learn more.
+You can visualize and do online analytics of your data on ThingSpeak using the built in version of MATLAB, or use the desktop version of MATLAB to get deeper historical insight. Visit https://www.mathworks.com/hardware-support/thingspeak.html to learn more.
 
-## Installation:
-1. Download the ZIP file to your machine.
+## Installation
+### Arduino IDE
+In the Arduino IDE, choose Sketch/Include Library/Manage Libraries.  Click the ThingSpeak Libary from the list, and click the Install button.
+--- or ---
+1. Download the ZIP file (below) to your machine.
 2. In the Arduino IDE, choose Sketch/Include Library/Add Zip Library
 3. Navigate to the ZIP file, and click Open
-
-See the Examples in the File/Examples menu.  The library appears in the Sketch/Include Library menu. Documentation is in the <USER>/libraries/ThingSpeak/extras/documentation directory
+### Spark IDE
+In the Spark Web IDE, click the libraries tab, find ThingSpeak, and choose "Include in App"
 
 ## Compatible Hardware:
 

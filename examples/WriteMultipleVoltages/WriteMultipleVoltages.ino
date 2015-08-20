@@ -9,7 +9,7 @@
   Copyright 2015, The MathWorks, Inc.
   
   Documentation for the ThingSpeak Communication Library for Arduino is in the extras/documentation folder where the library was installed.
-  See the accompaning licence.txt file for licensing information.
+  See the accompaning licence file for licensing information.
 */
 
 #include "ThingSpeak.h"
