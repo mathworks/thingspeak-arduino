@@ -8,18 +8,21 @@ ThingSpeak offers free data storage and analysis of time-stamped numeric or alph
 
 ThingSpeak stores data in channels. Channels support an unlimited number of timestamped observations (think of these as rows in a spreadsheet). Each channel has up to 8 fields (think of these as columns in a speadsheet).
 
-Channels may be public, where anyone can see the data, or private, where only the owner and select users can read the data. Each channel has an associated Write API Key that is used to control who can write to a channel. In addition, private channels have one or more Read API Keys to control who can read from private channel. An API Key is not required to read from public channels.
+Channels may be public, where anyone can see the data, or private, where only the owner and select users can read the data. Each channel has an associated Write API Key that is used to control who can write to a channel. In addition, private channels have one or more Read API Keys to control who can read from private channel. An API Key is not required to read from public channels.  Each channel can have up to 8 fields. One field is created by default.
 
 You can visualize and do online analytics of your data on ThingSpeak using the built in version of MATLAB, or use the desktop version of MATLAB to get deeper historical insight. Visit https://www.mathworks.com/hardware-support/thingspeak.html to learn more.
 
 ## Installation
-### Arduino IDE
+#### Arduino IDE
 In the Arduino IDE, choose Sketch/Include Library/Manage Libraries.  Click the ThingSpeak Libary from the list, and click the Install button.
+
 --- or ---
+
 1. Download the ZIP file (below) to your machine.
 2. In the Arduino IDE, choose Sketch/Include Library/Add Zip Library
 3. Navigate to the ZIP file, and click Open
-### Spark IDE
+
+#### Spark IDE
 In the Spark Web IDE, click the libraries tab, find ThingSpeak, and choose "Include in App"
 
 ## Compatible Hardware:
@@ -27,11 +30,6 @@ In the Spark Web IDE, click the libraries tab, find ThingSpeak, and choose "Incl
 * Arduino or compatible using a wired or Wi-Fi ethernet shield (we have tested with Uno and Mega)
 * Arduino Yun running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later. There are known issues with earlier versions. Visit this page to get the latest version.
 * Particle Core or Photon (Formally Spark)
-
-## Terms Used:
-* **Public Channel:** A channel that can be viewed on ThingSpeak with data that can be read by anybody. Writing requires an API Key.
-* **Private Channel:** A channel which only the owner can view and whose data can only be accessed by providing an API Key.
-* **Fields:** Each channel can have up to 8 fields. One field is created by default.
 
 ## Examples:
 
