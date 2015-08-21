@@ -29,8 +29,8 @@
   EthernetClient client;
 #endif
 
-int testPublicChannelNumber = 12397;
-int testPrivateChannelNumber = 31461;
+unsigned long testPublicChannelNumber = 12397;
+unsigned long testPrivateChannelNumber = 31461;
 const char * testPrivateChannelReadAPIKey = "NKX4Z5JGO4M5I18A";
 const char * testPrivateChannelWriteAPIKey = "LD79EOAAWRVYF04Y";
 

@@ -31,7 +31,7 @@
 
 #include <ThingSpeak.h>
 
-int testChannelNumber = 31461;
+unsigned long testChannelNumber = 31461;
 const char * testChannelWriteAPIKey = "LD79EOAAWRVYF04Y";
 
 test(beginCase) 

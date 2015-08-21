@@ -29,7 +29,7 @@
   EthernetClient client;
 #endif
 
-int testChannelNumber = 31461;
+unsigned long testChannelNumber = 31461;
 const char * testChannelWriteAPIKey = "LD79EOAAWRVYF04Y";
 
 #define WRITE_DELAY_FOR_THINGSPEAK 15000

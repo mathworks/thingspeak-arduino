@@ -56,7 +56,7 @@
   **** has more information. You need to change this to your channel, and your write API key
   **** IF YOU SHARE YOUR CODE WITH OTHERS, MAKE SURE YOU REMOVE YOUR WRITE API KEY!!
   *****************************************************************************************/
-int myChannelNumber = 31461;
+unsigned long myChannelNumber = 31461;
 const char * myWriteAPIKey = "LD79EOAAWRVYF04Y";
 
 void setup() {

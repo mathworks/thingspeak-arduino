@@ -65,7 +65,7 @@
   This is the ThingSpeak channel used in the write examples (31461).  It is private, and requires a
   read API key to access it.  We'll read from the first field.
 */
-int myChannelNumber = 31461;
+unsigned long myChannelNumber = 31461;
 const char * myReadAPIKey = "NKX4Z5JGO4M5I18A";
 
 void setup() {
