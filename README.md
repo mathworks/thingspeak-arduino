@@ -14,7 +14,7 @@ You can visualize and do online analytics of your data on ThingSpeak using the b
 
 ## Installation
 #### Arduino IDE
-In the Arduino IDE, choose Sketch/Include Library/Manage Libraries.  Click the ThingSpeak Libary from the list, and click the Install button.
+In the Arduino IDE, choose Sketch/Include Library/Manage Libraries.  Click the ThingSpeak Library from the list, and click the Install button.
 
 --- or ---
 
