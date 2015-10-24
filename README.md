@@ -30,6 +30,7 @@ In the Spark Web IDE, click the libraries tab, find ThingSpeak, and choose "Incl
 * Arduino or compatible using a wired or Wi-Fi ethernet shield (we have tested with Uno and Mega)
 * Arduino Yun running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later. There are known issues with earlier versions. Visit this page to get the latest version.
 * Particle Core or Photon (Formally Spark)
+* ESP8266 programmed with Arduino IDE (tested with NodeMCU 1.0 module)
 
 ## Examples:
 
