@@ -6,7 +6,7 @@ Complete technical documentation is in the extras/documentation folder inside th
 
 ThingSpeak offers free data storage and analysis of time-stamped numeric or alphanumeric data. Users can access ThingSpeak by visiting http://thingspeak.com and creating a ThingSpeak user account.
 
-ThingSpeak stores data in channels. Channels support an unlimited number of timestamped observations (think of these as rows in a spreadsheet). Each channel has up to 8 fields (think of these as columns in a speadsheet). Check out this video (http://www.mathworks.com/videos/introduction-to-thingspeak-107749.html) for an overview.
+ThingSpeak stores data in channels. Channels support an unlimited number of timestamped observations (think of these as rows in a spreadsheet). Each channel has up to 8 fields (think of these as columns in a speadsheet). Check out this [video](http://www.mathworks.com/videos/introduction-to-thingspeak-107749.html) for an overview.
 
 Channels may be public, where anyone can see the data, or private, where only the owner and select users can read the data. Each channel has an associated Write API Key that is used to control who can write to a channel. In addition, private channels have one or more Read API Keys to control who can read from private channel. An API Key is not required to read from public channels.  Each channel can have up to 8 fields. One field is created by default.
 
@@ -29,7 +29,7 @@ In the Spark Web IDE, click the libraries tab, find ThingSpeak, and choose "Incl
 
 * Arduino or compatible using a wired or Wi-Fi ethernet shield (we have tested with Uno and Mega), should work with Arduino WiFi Shield 101
 * Arduino Yun running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later. There are known issues with earlier versions. Visit this page to get the latest version.
-* ESP8266 (tested with SparkFun ESP8266 Thing - Dev Board, https://www.sparkfun.com/products/13711)
+* ESP8266. Tested with [SparkFun ESP8266 Thing - Dev Board](https://www.sparkfun.com/products/13711) and [NodeMCU 1.0 module](http://www.seeedstudio.com/depot/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html)
 * Particle Core, Photon, and Electron (Formally Spark)
 
 ## Examples:
