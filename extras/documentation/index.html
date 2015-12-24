@@ -1,4 +1,4 @@
-<!--   ThingSpeak(TM) Communication Library For Arduino
+<!--   ThingSpeak(TM) Communication Library For Arduino, ESP8266, and Particle
   ThingSpeak ( https://www.thingspeak.com ) is a free IoT service for building
   systems that collect, analyze, and react to their environments.
   Copyright 2015, The MathWorks, Inc.
@@ -9,7 +9,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.9.1"/>
-<title>ThingSpeak Communication Library For Arduino</title>
+<title>ThingSpeak Communication Library For Arduino, ESP8266, and Particle</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -22,8 +22,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ThingSpeak Communication Library for Arduino</div>
-   <div id="projectbrief">Enables an Arduino or other compatible hardware to write or read data to or from ThingSpeak&trade;</div>
+   <div id="projectname">ThingSpeak Communication Library</div>
+   <div id="projectbrief">Enables an Arduino, ESP8266, or Particle to write or read data to or from ThingSpeak&trade;</div>
   </td>
   <td valign="middle" align="right" id="projectlogo"><img alt="Logo" src="ThingSpeakLogo.jpg"/></td>
  </tr>
@@ -41,19 +41,20 @@
 </div><!-- top -->
 <div class="header">
   <div class="headertitle">
-<div class="title">ThingSpeak Communication Library for Arduino Documentation</div>  </div>
+<div class="title">ThingSpeak Communication Library Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="el" href="class_thing_speak_class.html">For technical documentation, visit this page</a></p>
 <p>ThingSpeak offers free data storage and analysis of time-stamped numeric or alphanumeric data. Users can access ThingSpeak by visiting <a href="http://thingspeak.com">http://thingspeak.com</a> and creating a ThingSpeak user account.</p>
-<p>ThingSpeak stores data in channels. Channels support an unlimited number of timestamped observations (think of these as rows in a spreadsheet). Each channel has up to 8 fields (think of these as columns in a speadsheet).</p>
+<p>ThingSpeak stores data in channels. Channels support an unlimited number of timestamped observations (think of these as rows in a spreadsheet). Each channel has up to 8 fields (think of these as columns in a speadsheet). Check out this <a href="http://www.mathworks.com/videos/introduction-to-thingspeak-107749.html">video</a> for an overview.</p>
 <p>Channels may be public, where anyone can see the data, or private, where only the owner and select users can read the data. Each channel has an associated Write API Key that is used to control who can write to a channel. In addition, private channels have one or more Read API Keys to control who can read from private channel. An API Key is not required to read from public channels. Each channel can have up to 8 fields. One field is created by default.</p>
 <p>You can visualize and do online analytics of your data on ThingSpeak using the built in version of MATLAB, or use the desktop version of MATLAB to get deeper historical insight. Visit <a href="https://www.mathworks.com/hardware-support/thingspeak.html">https://www.mathworks.com/hardware-support/thingspeak.html</a> to learn more.</p>
 <h3>Compatible Hardware</h3>
 <ul>
-<li><a href="http://www.arduino.cc">Arduino</a> or compatible using a wired or Wi-Fi ethernet shield (we have tested with <a href="http://www.arduino.cc/en/Main/ArduinoBoardUno">Uno</a> and <a href="http://www.arduino.cc/en/Main/ArduinoBoardMega2560">Mega</a>)</li>
+<li><a href="http://www.arduino.cc">Arduino</a> or compatible using a wired or Wi-Fi ethernet shield (we have tested with <a href="http://www.arduino.cc/en/Main/ArduinoBoardUno">Uno</a> and <a href="http://www.arduino.cc/en/Main/ArduinoBoardMega2560">Mega</a>), should work with Arduino WiFi Shield 101</li>
 <li><a href="http://www.arduino.cc/en/Main/ArduinoBoardYun">Arduino Yun</a> running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later. There are known issues with earlier versions. Visit <a href="http://www.arduino.cc/en/Main/Software">this page</a> to get the latest version.</li>
-<li>Particle <a href="https://store.particle.io/?product=spark-core">Core</a> or <a href="https://store.particle.io/?product=particle-photon">Photon</a> (Formally Spark)</li>
+<li>ESP8266 (tested with <a href="https://www.sparkfun.com/products/13711">SparkFun ESP8266 Thing - Dev Board</a> and <a href="http://www.seeedstudio.com/depot/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html">NodeMCU 1.0 module</a>)</li>
+<li>Particle (Formally Spark) Core, <a href="https://www.particle.io/prototype#photon">Photon</a>, and <a href="https://www.particle.io/prototype#electron">Electron</a></li>
 </ul>
 <h3>Examples</h3>
 <p>The library includes several examples to help you get started. These are accessible in the Examples/ThingSpeak menu off the File menu in the Arduino IDE.</p><ul>

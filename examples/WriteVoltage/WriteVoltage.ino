@@ -12,11 +12,15 @@
   See the accompaning licence file for licensing information.
 */
 
-#include "ThingSpeak.h"
+#ifdef SPARK
+	#include "ThingSpeak/ThingSpeak.h"
+#else
+	#include "ThingSpeak.h"
+#endif
 
 /// ***********************************************************************************************************
 // This example selects the correct library to use based on the board selected under the Tools menu in the IDE.
-// Yun, Wired Ethernet shield, wi-fi shield, and Spark are all supported.
+// Yun, Wired Ethernet shield, wi-fi shield, esp8266, and Spark are all supported.
 // With Uno and Mega, the default is that you're using a wired ethernet shield (http://www.arduino.cc/en/Main/ArduinoEthernetShield)
 // If you're using a wi-fi shield (http://www.arduino.cc/en/Main/ArduinoWiFiShield), uncomment the line below
 // ***********************************************************************************************************
@@ -30,6 +34,8 @@
 
     #ifdef USE_WIFI_SHIELD
       #include <SPI.h>
+      // ESP8266 USERS -- YOU MUST COMMENT OUT THE LINE BELOW.  There's a bug in the Arduino IDE that causes it to not respect #ifdef when it comes to #includes
+      // If you get "multiple definition of `WiFi'" -- comment out the line below.
       #include <WiFi.h>
       char ssid[] = "<YOURNETWORK>";          //  your network SSID (name) 
       char pass[] = "<YOURPASSWORD>";   // your network password
@@ -43,10 +49,27 @@
       EthernetClient client;
     #endif
   #endif
+  // On Arduino:  0 - 1023 maps to 0 - 5 volts
+  #define VOLTAGE_MAX 5.0
+  #define VOLTAGE_MAXCOUNTS 1023.0
+#endif
+
+#ifdef ARDUINO_ARCH_ESP8266
+  #include <ESP8266WiFi.h>
+  char ssid[] = "<YOURNETWORK>";          //  your network SSID (name) 
+  char pass[] = "<YOURPASSWORD>";   // your network password
+  int status = WL_IDLE_STATUS;
+  WiFiClient  client;
+  // On ESP8266:  0 - 1023 maps to 0 - 1 volts
+  #define VOLTAGE_MAX 1.0
+  #define VOLTAGE_MAXCOUNTS 1023.0
 #endif
 
 #ifdef SPARK
     TCPClient client;
+    // On Particle: 0 - 4095 maps to 0 - 3.3 volts
+    #define VOLTAGE_MAX 3.3
+    #define VOLTAGE_MAXCOUNTS 4095.0
 #endif
 
 /*
@@ -60,27 +83,18 @@ unsigned long myChannelNumber = 31461;
 const char * myWriteAPIKey = "LD79EOAAWRVYF04Y";
 
 void setup() {
-  #ifdef ARDUINO_ARCH_AVR
+  #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266)
     #ifdef ARDUINO_AVR_YUN
       Bridge.begin();
     #else
-      #ifdef USE_WIFI_SHIELD
+      #if defined(USE_WIFI_SHIELD) || defined(ARDUINO_ARCH_ESP8266)
         WiFi.begin(ssid, pass);
       #else
         Ethernet.begin(mac);
       #endif
     #endif
-    // On Arduino:  0 - 1023 maps to 0 - 5 volts
-    #define VOLTAGE_MAX 5.0
-    #define VOLTAGE_MAXCOUNTS 1023.0
   #endif
-  
-  #ifdef SPARK
-    // On Particle: 0 - 4095 maps to 0 - 3.3 volts
-    #define VOLTAGE_MAX 3.3
-    #define VOLTAGE_MAXCOUNTS 4095.0
-  #endif
-
+ 
   ThingSpeak.begin(client);
 }
 
@@ -89,6 +103,7 @@ void loop() {
   int sensorValue = analogRead(A0);
   // Convert the analog reading 
   // On Arduino:  0 - 1023 maps to 0 - 5 volts
+  // On ESP8266:  0 - 1023 maps to 0 - 1 volts
   // On Particle: 0 - 4095 maps to 0 - 3.3 volts
   float voltage = sensorValue * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
 

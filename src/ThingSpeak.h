@@ -1,5 +1,5 @@
 /*
-  ThingSpeak(TM) Communication Library For Arduino
+  ThingSpeak(TM) Communication Library For Arduino, ESP8266, and Particle
 
   Enables an Arduino or other compatible hardware to write or read data to or from ThingSpeak,
   an open data platform for the Internet of Things with MATLAB analytics and visualization. 
@@ -21,7 +21,7 @@
  * Users can access ThingSpeak by visiting http://thingspeak.com and creating a ThingSpeak user account.
  *
  * ThingSpeak stores data in channels.  Channels support an unlimited number of timestamped observations (think of these as rows in a spreadsheet).  
- * Each channel has up to 8 fields (think of these as columns in a speadsheet).  
+ * Each channel has up to 8 fields (think of these as columns in a speadsheet).  Check out this <a href="http://www.mathworks.com/videos/introduction-to-thingspeak-107749.html">video</a> for an overview.
  * 
  * Channels may be public, where anyone can see the data, or private, where only the owner and select users can read the data.
  * Each channel has an associated Write API Key that is used to control who can write to a channel.  
@@ -32,9 +32,10 @@
  * deeper historical insight.  Visit https://www.mathworks.com/hardware-support/thingspeak.html to learn more.
  * 
  * <h3>Compatible Hardware</h3>
- * * <a href="http://www.arduino.cc">Arduino</a> or compatible using a wired or Wi-Fi ethernet shield (we have tested with <a href="http://www.arduino.cc/en/Main/ArduinoBoardUno">Uno</a> and <a href="http://www.arduino.cc/en/Main/ArduinoBoardMega2560">Mega</a>)
+ * * <a href="http://www.arduino.cc">Arduino</a> or compatible using a wired or Wi-Fi ethernet shield (we have tested with <a href="http://www.arduino.cc/en/Main/ArduinoBoardUno">Uno</a> and <a href="http://www.arduino.cc/en/Main/ArduinoBoardMega2560">Mega</a>), should work with Arduino WiFi Shield 101
  * * <a href="http://www.arduino.cc/en/Main/ArduinoBoardYun">Arduino Yun</a> running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later.  There are known issues with earlier versions.  Visit [this page](http://www.arduino.cc/en/Main/Software) to get the latest version.
- * * Particle <a href="https://store.particle.io/?product=spark-core">Core</a> or <a href="https://store.particle.io/?product=particle-photon">Photon</a> (Formally Spark)
+ * * ESP8266 (tested with <a href="https://www.sparkfun.com/products/13711">SparkFun ESP8266 Thing - Dev Board</a> and <a href="http://www.seeedstudio.com/depot/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html">NodeMCU 1.0 module</a>)
+ * * Particle (Formally Spark) Core, <a href="https://www.particle.io/prototype#photon">Photon</a>, and <a href="https://www.particle.io/prototype#electron">Electron</a>
  * 
  * <h3>Examples</h3>
  * The library includes several examples to help you get started.  These are accessible in the Examples/ThingSpeak menu off the File menu in the Arduino IDE.
@@ -56,13 +57,17 @@
     // Create platform defines for Particle devices
     #if PLATFORM_ID == 6
         #define PARTICLE_PHOTON
+        #define PARTICLE_PHOTONELECTRON
+    #elif PLATFORM_ID == 10
+        #define PARTICLE_ELECTRON
+        #define PARTICLE_PHOTONELECTRON
     #elif PLATFORM_ID == 0
         #define PARTICLE_CORE
     #endif
 
     #include "math.h"
     #include "application.h"
-    #ifdef PARTICLE_PHOTON
+    #ifdef PARTICLE_PHOTONELECTRON
         extern char* dtoa(double val, unsigned char prec, char *sout);
         // On spark photon, There is no itoa, so map to ltoa.
         #include "string_convert.h"
@@ -74,11 +79,11 @@
         extern char *dtostrf (double val, signed char width, unsigned char prec, char *sout);
     #endif
 #else
-	#ifdef ARDUINO_ARCH_AVR
+	#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266)
 	  #include "Arduino.h"
 	  #include <Client.h>
 	#else
-      #error Only Arduino Yun, Uno/Mega/Due with either Wired or wi-fi Ethernet shield, and Spark Core/Photon are supported.
+      #error Only Arduino Yun, Uno/Mega/Due with either Wired or wi-fi Ethernet shield, ESP8266, and Spark Core/Photon/Electron are supported.
 	#endif
 #endif
 
@@ -88,13 +93,20 @@
 
 #ifdef ARDUINO_ARCH_AVR
     #ifdef ARDUINO_AVR_YUN
-        #define TS_USER_AGENT "tslib-arduino/1.0 (arduino uno or mega)"
-    #else
         #define TS_USER_AGENT "tslib-arduino/1.0 (arduino yun)"
+    #else
+        #define TS_USER_AGENT "tslib-arduino/1.0 (arduino uno or mega)"
     #endif
-#endif
-#ifdef SPARK
-    #define TS_USER_AGENT "tslib-arduino/1.0 (particle core or photon)"
+#elif defined(ARDUINO_ARCH_ESP8266)
+    #define TS_USER_AGENT "tslib-arduino/1.0 (ESP8266)"
+#elif defined(SPARK)
+    #ifdef PARTICLE_CORE
+        #define TS_USER_AGENT "tslib-arduino/1.0 (particle core)"
+    #elif defined(PARTICLE_PHOTON)
+        #define TS_USER_AGENT "tslib-arduino/1.0 (particle photon)"
+    #elif defined(PARTICLE_ELECTRON)
+        #define TS_USER_AGENT "tslib-arduino/1.0 (particle electron)"
+    #endif
     #define SPARK_PUBLISH_TTL 60 // Spark "time to live" for published messages
     #define SPARK_PUBLISH_TOPIC "thingspeak-debug"
 #endif
@@ -118,7 +130,7 @@
 #define ERR_NOT_INSERTED        -401    // Point was not inserted (most probable cause is the rate limit of once every 15 seconds)
 
 /**
- * @brief This library enables an Arduino or other compatible hardware to write or read data to or from ThingSpeak, an open data platform for the Internet of Things with MATLAB analytics and visualization. 
+ * @brief Enables an Arduino, ESP8266, Particle or other compatible hardware to write or read data to or from ThingSpeak, an open data platform for the Internet of Things with MATLAB analytics and visualization. 
  */
 class ThingSpeakClass
 {
@@ -1437,7 +1449,7 @@ private:
 			return ERR_OUT_OF_RANGE;
 		}
 		// Given that the resolution of Spark is 1 / 2^12, or ~0.00024 volts, assume that 5 places right of decimal should be sufficient for most applications
-        #ifdef PARTICLE_PHOTON
+        #ifdef PARTICLE_PHOTONELECTRON
           //Photon doesn't have a dtostrf, but does have dtoa
           dtoa((double)value,5, valueString);
         #else

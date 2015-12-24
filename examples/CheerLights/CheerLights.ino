@@ -3,7 +3,7 @@
   
   Reads the latest CheerLights color on ThingSpeak, and sets a common anode RGB LED on digital pins 5, 6, and 9.
   On Spark core, the built in RGB LED is used
-  Visit https://www.cheerlights.com for more info.
+  Visit http://www.cheerlights.com for more info.
 
   ThingSpeak ( https://www.thingspeak.com ) is a free IoT service for prototyping
   systems that collect, analyze, and react to their environments.
@@ -14,16 +14,19 @@
   See the accompaning licence file for licensing information.
 */
 
-#include "ThingSpeak.h"
+#ifdef SPARK
+	#include "ThingSpeak/ThingSpeak.h"
+#else
+	#include "ThingSpeak.h"
+#endif
 
 // ***********************************************************************************************************
 // This example selects the correct library to use based on the board selected under the Tools menu in the IDE.
-// Yun, Wired Ethernet shield, wi-fi shield, and Spark are all supported.
+// Yun, Wired Ethernet shield, wi-fi shield, esp8266, and Spark are all supported.
 // With Uno and Mega, the default is that you're using a wired ethernet shield (http://www.arduino.cc/en/Main/ArduinoEthernetShield)
 // If you're using a wi-fi shield (http://www.arduino.cc/en/Main/ArduinoWiFiShield), uncomment the line below
 // ***********************************************************************************************************
 //#define USE_WIFI_SHIELD
-#ifdef ARDUINO_ARCH_AVR
 
 // Make sure that you put a 330 ohm resistor between the arduino
 // pins and each of the color pins on the LED.
@@ -31,6 +34,7 @@ int pinRed = 9;
 int pinGreen = 6;
 int pinBlue = 5;
 
+#ifdef ARDUINO_ARCH_AVR
   #ifdef ARDUINO_AVR_YUN
     #include "YunClient.h"
     YunClient client;
@@ -38,6 +42,8 @@ int pinBlue = 5;
 
     #ifdef USE_WIFI_SHIELD
       #include <SPI.h>
+      // ESP8266 USERS -- YOU MUST COMMENT OUT THE LINE BELOW.  There's a bug in the Arduino IDE that causes it to not respect #ifdef when it comes to #includes
+      // If you get "multiple definition of `WiFi'" -- comment out the line below.
       #include <WiFi.h>
       char ssid[] = "<YOURNETWORK>";          //  your network SSID (name) 
       char pass[] = "<YOURPASSWORD>";   // your network password
@@ -53,6 +59,14 @@ int pinBlue = 5;
   #endif
 #endif
 
+#ifdef ARDUINO_ARCH_ESP8266
+  #include <ESP8266WiFi.h>
+  char ssid[] = "<YOURNETWORK>";          //  your network SSID (name) 
+  char pass[] = "<YOURPASSWORD>";   // your network password
+  int status = WL_IDLE_STATUS;
+  WiFiClient  client;
+#endif
+
 #ifdef SPARK
   TCPClient client;
 #endif
@@ -66,22 +80,21 @@ int pinBlue = 5;
 unsigned long cheerLightsChannelNumber = 1417;
 
 void setup() {
-  #ifdef ARDUINO_ARCH_AVR
-    Serial.begin(9600);
+  #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266)
     #ifdef ARDUINO_AVR_YUN
       Bridge.begin();
     #else
-      #ifdef USE_WIFI_SHIELD
-        WiFi.begin(ssid, pass);
+      #if defined(USE_WIFI_SHIELD) || defined(ARDUINO_ARCH_ESP8266)
+         WiFi.begin(ssid, pass);
       #else
         Ethernet.begin(mac);
       #endif
     #endif
   #endif
-
+  
   ThingSpeak.begin(client);
 
-  #ifdef ARDUINO_ARCH_AVR
+  #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266)
       pinMode(pinRed,OUTPUT);
       pinMode(pinGreen,OUTPUT);
       pinMode(pinBlue,OUTPUT);
@@ -101,20 +114,19 @@ void loop() {
 String colorName[] = {"none","red","pink","green","blue","cyan","white","warmwhite","oldlace","purple","magenta","yellow","orange"};
 
 // Map of RGB values for each of the Cheerlight color names
-int colorRGB[][3] = {     0,  0,  0, // "none"
-                        255,  0,  0, // "red"
-                        255,192,203, // "pink"
-                          0,255,  0, // "green"
-                          0,  0,255, // "blue"
-                          0, 255,255, // "cyan",
-                        255, 50,100, // "white",
-                        255, 30, 10, // "warmwhite",
-                        255, 30, 10, // "oldlace",
-                        128,  0, 25, // "purple",
-                        255,  0, 50, // "magenta",
-                        255, 100,  0, // "yellow",
-                        255, 10,  0}; // "orange"};
-
+int colorRGB[][3] = {     0,  0,  0,  // "none"
+                        255,  0,  0,  // "red"
+                        255,192,203,  // "pink"
+                          0,255,  0,  // "green"
+                          0,  0,255,  // "blue"
+                          0,255,255,  // "cyan",
+                        255,255,255,  // "white",
+                        255,223,223,  // "warmwhite",
+                        255,223,223,  // "oldlace",
+                        128,  0,128,  // "purple",
+                        255,  0,255,  // "magenta",
+                        255,255,  0,  // "yellow",
+                        255,165,  0}; // "orange"};
 
 void setColor(String color)
 {
@@ -123,9 +135,9 @@ void setColor(String color)
   {
     if(color == colorName[iColor])
     {
-    // When it matches, look up the RGB values for that color in the table,
-    // and write the red, green, and blue values.
-      #ifdef ARDUINO_ARCH_AVR
+      // When it matches, look up the RGB values for that color in the table,
+      // and write the red, green, and blue values.
+      #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266)
         analogWrite(pinRed,colorRGB[iColor][0]);
         analogWrite(pinGreen,colorRGB[iColor][1]);
         analogWrite(pinBlue,colorRGB[iColor][2]);

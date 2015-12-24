@@ -12,11 +12,15 @@
   See the accompaning licence file for licensing information.
 */
 
-#include "ThingSpeak.h"
+#ifdef SPARK
+	#include "ThingSpeak/ThingSpeak.h"
+#else
+	#include "ThingSpeak.h"
+#endif
 
 /// ***********************************************************************************************************
 // This example selects the correct library to use based on the board selected under the Tools menu in the IDE.
-// Yun, Wired Ethernet shield, wi-fi shield, and Spark are all supported.
+// Yun, Wired Ethernet shield, wi-fi shield, esp8266, and Spark are all supported.
 // With Uno and Mega, the default is that you're using a wired ethernet shield (http://www.arduino.cc/en/Main/ArduinoEthernetShield)
 // If you're using a wi-fi shield (http://www.arduino.cc/en/Main/ArduinoWiFiShield), uncomment the line below
 // ***********************************************************************************************************
@@ -30,6 +34,8 @@
 
     #ifdef USE_WIFI_SHIELD
       #include <SPI.h>
+      // ESP8266 USERS -- YOU MUST COMMENT OUT THE LINE BELOW.  There's a bug in the Arduino IDE that causes it to not respect #ifdef when it comes to #includes
+      // If you get "multiple definition of `WiFi'" -- comment out the line below.
       #include <WiFi.h>
       char ssid[] = "<YOURNETWORK>";          //  your network SSID (name) 
       char pass[] = "<YOURPASSWORD>";   // your network password
@@ -45,6 +51,17 @@
   #endif
   // On Arduino:  0 - 1023 maps to 0 - 5 volts
   #define VOLTAGE_MAX 5.0
+  #define VOLTAGE_MAXCOUNTS 1023.0
+#endif
+
+#ifdef ARDUINO_ARCH_ESP8266
+  #include <ESP8266WiFi.h>
+  char ssid[] = "<YOURNETWORK>";          //  your network SSID (name) 
+  char pass[] = "<YOURPASSWORD>";   // your network password
+  int status = WL_IDLE_STATUS;
+  WiFiClient  client;
+  // On ESP8266:  0 - 1023 maps to 0 - 1 volts
+  #define VOLTAGE_MAX 1.0
   #define VOLTAGE_MAXCOUNTS 1023.0
 #endif
 
@@ -65,11 +82,11 @@ unsigned long myChannelNumber = 31461;
 const char * myWriteAPIKey = "LD79EOAAWRVYF04Y";
 
 void setup() {
-  #ifdef ARDUINO_ARCH_AVR
+  #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266)
     #ifdef ARDUINO_AVR_YUN
       Bridge.begin();
     #else
-      #ifdef USE_WIFI_SHIELD
+      #if defined(USE_WIFI_SHIELD) || defined(ARDUINO_ARCH_ESP8266)
         WiFi.begin(ssid, pass);
       #else
         Ethernet.begin(mac);
@@ -81,30 +98,31 @@ void setup() {
 }
 
 void loop() {
-  // Read the input on each pin and convert the reading
+  // Read the input on each pin, convert the reading, and set each field to be sent to ThingSpeak.
   // On Arduino:  0 - 1023 maps to 0 - 5 volts
+  // On ESP8266:  0 - 1023 maps to 0 - 1 volts
   // On Particle: 0 - 4095 maps to 0 - 3.3 volts
-  float pin0Voltage = analogRead(A0) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-  float pin1Voltage = analogRead(A1) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-  float pin2Voltage = analogRead(A2) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-  float pin3Voltage = analogRead(A3) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-  float pin4Voltage = analogRead(A4) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-  float pin5Voltage = analogRead(A5) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-  float pin6Voltage = analogRead(A6) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-  float pin7Voltage = analogRead(A7) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
+  float pinVoltage = analogRead(A0) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
+  ThingSpeak.setField(1,pinVoltage);
+  #ifndef ARDUINO_ARCH_ESP8266
+    // The ESP8266 only has one analog input, so skip this
+    pinVoltage = analogRead(A1) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
+    ThingSpeak.setField(2,pinVoltage);
+    pinVoltage = analogRead(A2) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
+    ThingSpeak.setField(3,pinVoltage);
+    pinVoltage = analogRead(A3) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
+    ThingSpeak.setField(4,pinVoltage);
+    pinVoltage = analogRead(A4) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
+    ThingSpeak.setField(5,pinVoltage);
+    pinVoltage = analogRead(A5) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
+    ThingSpeak.setField(6,pinVoltage);
+    pinVoltage = analogRead(A6) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
+    ThingSpeak.setField(7,pinVoltage);
+    pinVoltage = analogRead(A7) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
+    ThingSpeak.setField(8,pinVoltage);
+  #endif
 
-  // Write to ThingSpeak. There are up to 8 fields in a channel, and we're writing to all of them.  
-  // First, you set each of the fields you want to send
-  ThingSpeak.setField(1,pin0Voltage);
-  ThingSpeak.setField(2,pin1Voltage);
-  ThingSpeak.setField(3,pin2Voltage);
-  ThingSpeak.setField(4,pin3Voltage);
-  ThingSpeak.setField(5,pin4Voltage);
-  ThingSpeak.setField(6,pin5Voltage);
-  ThingSpeak.setField(7,pin6Voltage);
-  ThingSpeak.setField(8,pin7Voltage);
-
-  // Then you write the fields that you've set all at once.
+  // Write the fields that you've set all at once.
   ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);  
 
   delay(20000); // ThingSpeak will only accept updates every 15 seconds. 

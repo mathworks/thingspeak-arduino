@@ -15,11 +15,15 @@
   See the accompaning licence file for licensing information.
 */
 
-#include "ThingSpeak.h"
+#ifdef SPARK
+	#include "ThingSpeak/ThingSpeak.h"
+#else
+	#include "ThingSpeak.h"
+#endif
 
 // ***********************************************************************************************************
 // This example selects the correct library to use based on the board selected under the Tools menu in the IDE.
-// Yun, Wired Ethernet shield, wi-fi shield, and Spark are all supported.
+// Yun, Wired Ethernet shield, wi-fi shield, esp8266, and Spark are all supported.
 // With Uno and Mega, the default is that you're using a wired ethernet shield (http://www.arduino.cc/en/Main/ArduinoEthernetShield)
 // If you're using a wi-fi shield (http://www.arduino.cc/en/Main/ArduinoWiFiShield), uncomment the line below
 // ***********************************************************************************************************
@@ -33,6 +37,8 @@
 
     #ifdef USE_WIFI_SHIELD
       #include <SPI.h>
+      // ESP8266 USERS -- YOU MUST COMMENT OUT THE LINE BELOW.  There's a bug in the Arduino IDE that causes it to not respect #ifdef when it comes to #includes
+      // If you get "multiple definition of `WiFi'" -- comment out the line below.
       #include <WiFi.h>
       char ssid[] = "<YOURNETWORK>";          //  your network SSID (name) 
       char pass[] = "<YOURPASSWORD>";   // your network password
@@ -48,7 +54,15 @@
   #endif
 #endif
 
-// On the Particle Core and Photon, the results are published to the Particle dashboard using events.
+#ifdef ARDUINO_ARCH_ESP8266
+  #include <ESP8266WiFi.h>
+  char ssid[] = "<YOURNETWORK>";          //  your network SSID (name) 
+  char pass[] = "<YOURPASSWORD>";   // your network password
+  int status = WL_IDLE_STATUS;
+  WiFiClient  client;
+#endif
+
+// Particle Core, Photon, and Electron the results are published to the Particle dashboard using events.
 // Go to http://dashboard.particle.io, click on the logs tab, and you'll see the events coming in. 
 #ifdef SPARK
   TCPClient client;
@@ -69,12 +83,12 @@ unsigned long myChannelNumber = 31461;
 const char * myReadAPIKey = "NKX4Z5JGO4M5I18A";
 
 void setup() {
-  #ifdef ARDUINO_ARCH_AVR
+  #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266)
     Serial.begin(9600);
     #ifdef ARDUINO_AVR_YUN
       Bridge.begin();
     #else
-      #ifdef USE_WIFI_SHIELD
+      #if defined(USE_WIFI_SHIELD) || defined(ARDUINO_ARCH_ESP8266)
         WiFi.begin(ssid, pass);
       #else
         Ethernet.begin(mac);
@@ -88,7 +102,7 @@ void setup() {
 void loop() {
   // Read the latest value from field 1 of channel 31461
   float voltage = ThingSpeak.readFloatField(myChannelNumber, 1, myReadAPIKey);
-  #ifdef ARDUINO_ARCH_AVR
+  #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266)
     Serial.print("Latest voltage is: "); 
     Serial.print(voltage);
     Serial.println("V"); 
