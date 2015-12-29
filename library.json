@@ -1,0 +1,13 @@
+{
+  "name": "ThingSpeak",
+  "keywords": "iot",
+  "description": "ThingSpeak Communication Library",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/mathworks/thingspeak-arduino.git"
+  },
+  "exclude": "extras",
+  "frameworks": "arduino",
+  "platforms": "*"
+}
