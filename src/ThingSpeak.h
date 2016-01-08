@@ -7,7 +7,7 @@
   ThingSpeak ( https://www.thingspeak.com ) is a free IoT service for building
   systems that collect, analyze, and react to their environments.
   
-  Copyright 2015, The MathWorks, Inc.
+  Copyright 2016, The MathWorks, Inc.
  
   See the accompaning licence file for licensing information.
 */
@@ -377,7 +377,7 @@ class ThingSpeakClass
 		
 		#ifdef PRINT_DEBUG_MESSAGES
 		  #ifdef SPARK
-            Spark.publish(SPARK_PUBLISH_TOPIC, "writeField (" + String(channelNumber) + ", " + String(writeAPIKey) + ", " + String(field) + ", " + String(value) + ")", SPARK_PUBLISH_TTL, PRIVATE);
+            Particle.publish(SPARK_PUBLISH_TOPIC, "writeField (" + String(channelNumber) + ", " + String(writeAPIKey) + ", " + String(field) + ", " + String(value) + ")", SPARK_PUBLISH_TTL, PRIVATE);
           #else
 			Serial.print("ts::writeField (channelNumber: "); Serial.print(channelNumber); Serial.print(" writeAPIKey: "); Serial.print(writeAPIKey); Serial.print(" field: "); Serial.print(field); Serial.print(" value: \""); Serial.print(value); Serial.println("\")");
 		  #endif
@@ -581,7 +581,7 @@ class ThingSpeakClass
 	{
 		#ifdef PRINT_DEBUG_MESSAGES
 		  #ifdef SPARK
-            Spark.publish(SPARK_PUBLISH_TOPIC, "setField " + String(field) + " to " + String(value), SPARK_PUBLISH_TTL, PRIVATE);
+            Particle.publish(SPARK_PUBLISH_TOPIC, "setField " + String(field) + " to " + String(value), SPARK_PUBLISH_TTL, PRIVATE);
           #else
 			Serial.print("ts::setField   (field: "); Serial.print(field); Serial.print(" value: \""); Serial.print(value); Serial.println("\")");
 		  #endif
@@ -876,7 +876,7 @@ class ThingSpeakClass
 
 		#ifdef PRINT_DEBUG_MESSAGES
 		  #ifdef SPARK
-            Spark.publish(SPARK_PUBLISH_TOPIC, "Post " + postMessage, SPARK_PUBLISH_TTL, PRIVATE);
+            Particle.publish(SPARK_PUBLISH_TOPIC, "Post " + postMessage, SPARK_PUBLISH_TTL, PRIVATE);
           #else
 			Serial.print("               POST \"");Serial.print(postMessage);Serial.println("\"");
 		  #endif
@@ -1322,7 +1322,7 @@ private:
 			    // Connect to the server on port 80 (HTTP) at the URL address
 			    #ifdef PRINT_DEBUG_MESSAGES
     		      #ifdef SPARK
-                    Spark.publish(SPARK_PUBLISH_TOPIC, "Attempt Connect to URL " + String(this->customHostName), SPARK_PUBLISH_TTL, PRIVATE);
+                    Particle.publish(SPARK_PUBLISH_TOPIC, "Attempt Connect to URL " + String(this->customHostName), SPARK_PUBLISH_TTL, PRIVATE);
                   #else
 				    Serial.print("               Connect to ");Serial.print(this->customHostName);Serial.print(" ...");
 			      #endif
@@ -1335,7 +1335,7 @@ private:
 		if (connectSuccess)
 		{
     	    #ifdef SPARK
-              Spark.publish(SPARK_PUBLISH_TOPIC, "Connection Success", SPARK_PUBLISH_TTL, PRIVATE);
+              Particle.publish(SPARK_PUBLISH_TOPIC, "Connection Success", SPARK_PUBLISH_TTL, PRIVATE);
             #else
 		      Serial.println("Success.");
 		    #endif
@@ -1343,7 +1343,7 @@ private:
 		else
 		{
     	    #ifdef SPARK
-              Spark.publish(SPARK_PUBLISH_TOPIC, "Connection Failure", SPARK_PUBLISH_TTL, PRIVATE);
+              Particle.publish(SPARK_PUBLISH_TOPIC, "Connection Failure", SPARK_PUBLISH_TTL, PRIVATE);
             #else
   			  Serial.println("Failed.");
   			#endif
@@ -1392,50 +1392,73 @@ private:
 		if(!client->find(const_cast<char *>("HTTP/1.1")))
 		{
 			#ifdef PRINT_HTTP
-				Serial.println("ERROR: Didn't find HTTP/1.1");
-			#endif
+                #ifdef SPARK
+                    Particle.publish(SPARK_PUBLISH_TOPIC, "ERROR: Didn't find HTTP/1.1", SPARK_PUBLISH_TTL, PRIVATE);
+                #else
+    				Serial.println("ERROR: Didn't find HTTP/1.1");
+    			#endif
+    		#endif
 			return ERR_BAD_RESPONSE; // Couldn't parse response (didn't find HTTP/1.1)
 		}
 		int status = client->parseInt();
 		#ifdef PRINT_HTTP
-			Serial.print("Got Status of ");Serial.println(status);
+            #ifdef SPARK
+                Particle.publish(SPARK_PUBLISH_TOPIC, "Got Status of " + String(status), SPARK_PUBLISH_TTL, PRIVATE);
+            #else
+    			Serial.print("Got Status of ");Serial.println(status);
+    		#endif
 		#endif
 		if(status != OK_SUCCESS)
 		{
 			return status;
 		}
 
-		if(!client->find(const_cast<char *>("\n\r\n")))
-		{
-			#ifdef PRINT_HTTP
-				Serial.println("ERROR: Didn't find end of header");
-			#endif
-			return ERR_BAD_RESPONSE;
-		}
-		#ifdef PRINT_HTTP
-			Serial.println("Found end of header");
-		#endif
-		#ifndef PRINT_HTTP
-    		client->parseInt();
-		#else
-    		long length = client->parseInt();
-			Serial.print("Got length of ");Serial.println(length);
-		#endif
 		if(!client->find(const_cast<char *>("\r\n")))
 		{
 			#ifdef PRINT_HTTP
-				Serial.println("ERROR: Didn't find end of length");
+                #ifdef SPARK
+                    Particle.publish(SPARK_PUBLISH_TOPIC, "ERROR: Didn't find end of status line", SPARK_PUBLISH_TTL, PRIVATE);
+                #else
+    				Serial.println("ERROR: Didn't find end of status line");
+    			#endif
 			#endif
 			return ERR_BAD_RESPONSE;
 		}
 		#ifdef PRINT_HTTP
-			Serial.println("Found end of length");
+            #ifdef SPARK
+                Particle.publish(SPARK_PUBLISH_TOPIC, "Found end of status line", SPARK_PUBLISH_TTL, PRIVATE);
+            #else
+    			Serial.println("Found end of status line");
+    	    #endif
+		#endif
+
+		if(!client->find(const_cast<char *>("\n\r\n")))
+		{
+			#ifdef PRINT_HTTP
+                #ifdef SPARK
+                    Particle.publish(SPARK_PUBLISH_TOPIC, "ERROR: Didn't find end of header", SPARK_PUBLISH_TTL, PRIVATE);
+                #else
+    				Serial.println("ERROR: Didn't find end of header");
+    			#endif
+			#endif
+			return ERR_BAD_RESPONSE;
+		}
+		#ifdef PRINT_HTTP
+            #ifdef SPARK
+                Particle.publish(SPARK_PUBLISH_TOPIC, "Found end of header", SPARK_PUBLISH_TTL, PRIVATE);
+            #else
+			    Serial.println("Found end of header");
+			#endif
 		#endif
 		// This is a workaround to a bug in the Spark implementation of String
 		String tempString = client->readStringUntil('\r');
 		response = tempString;
 		#ifdef PRINT_HTTP
-			Serial.print("Response: \"");Serial.print(response);Serial.println("\"");
+            #ifdef SPARK
+                Particle.publish(SPARK_PUBLISH_TOPIC, "Response: \"" + tempString + "\"", SPARK_PUBLISH_TTL, PRIVATE);
+            #else
+    			Serial.print("Response: \"");Serial.print(response);Serial.println("\"");
+			#endif
 		#endif
 		return status;
 	};

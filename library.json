@@ -1,0 +1,24 @@
+{
+  "name": "ThingSpeak",
+  "keywords": "iot",
+  "description": "ThingSpeak Communication Library for Arduino & ESP8266",
+  "authors":
+  {
+	  "name": "MathWorks",
+	  "email": "thingspeak@mathworks.com",
+	  "url": "https://www.thingspeak.com/",
+	  "maintainer": true
+  },
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/mathworks/thingspeak-arduino.git"
+  },
+  "examples": [
+    "examples/*/*.ino"
+  ],
+  "url": "https://www.thingspeak.com/",
+  "exclude": "extras",
+  "frameworks": "arduino",
+  "platforms": "*"
+}

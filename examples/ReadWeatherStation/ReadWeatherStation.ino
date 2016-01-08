@@ -7,7 +7,7 @@
   ThingSpeak ( https://www.thingspeak.com ) is a free IoT service for prototyping
   systems that collect, analyze, and react to their environments.
   
-  Copyright 2015, The MathWorks, Inc.
+  Copyright 2016, The MathWorks, Inc.
   
   Documentation for the ThingSpeak Communication Library for Arduino is in the extras/documentation folder where the library was installed.
   See the accompaning licence file for licensing information.
@@ -126,16 +126,16 @@ void loop() {
     Serial.println(); 
   #endif
   #ifdef SPARK
-    Spark.publish("thingspeak-weather", "Current weather conditions in Natick: ",60,PRIVATE);
-    Spark.publish("thingspeak-weather", String(temperature) + " degrees F, " + String(humidity) + "% humidity",60,PRIVATE); 
-    Spark.publish("thingspeak-weather", "Wind at " + String(windSpeed) + " MPH at " + String (windDirection) + " degrees",60,PRIVATE); 
+    Particle.publish("thingspeak-weather", "Current weather conditions in Natick: ",60,PRIVATE);
+    Particle.publish("thingspeak-weather", String(temperature) + " degrees F, " + String(humidity) + "% humidity",60,PRIVATE); 
+    Particle.publish("thingspeak-weather", "Wind at " + String(windSpeed) + " MPH at " + String (windDirection) + " degrees",60,PRIVATE); 
     if(rainfall > 0)
     {
-      Spark.publish("thingspeak-weather", "Pressure is " + String(pressure) + " inHg, and it's raining",60,PRIVATE);
+      Particle.publish("thingspeak-weather", "Pressure is " + String(pressure) + " inHg, and it's raining",60,PRIVATE);
     }
     else
     {
-      Spark.publish("thingspeak-weather", "Pressure is " + String(pressure) + " inHg",60,PRIVATE);
+      Particle.publish("thingspeak-weather", "Pressure is " + String(pressure) + " inHg",60,PRIVATE);
     }
   #endif
 
