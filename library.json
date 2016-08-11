@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/mathworks/thingspeak-arduino.git"
   },
-  "version": "1.1.1",
+  "version": "1.1.2",
   "examples": [
     "examples/*/*.ino"
   ],
