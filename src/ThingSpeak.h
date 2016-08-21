@@ -757,7 +757,7 @@ class ThingSpeakClass
 		}
 	 * @endcode
 	 */
-	int setStatus(float status)
+	int setStatus(String status)
 	{
 		#ifdef PRINT_DEBUG_MESSAGES
 			Serial.print("ts::setStatus(status: "); Serial.print(status); Serial.println("\")");
