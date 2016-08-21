@@ -5,6 +5,7 @@ setField	KEYWORD2
 setLatitude	KEYWORD2
 setLongitude	KEYWORD2
 setElevation	KEYWORD2
+setStatus	KEYWORD2
 writeRaw	KEYWORD2
 writeFields	KEYWORD2
 readFloatField	KEYWORD2
