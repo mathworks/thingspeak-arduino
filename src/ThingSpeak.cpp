@@ -1,10 +1,10 @@
 /*
   ThingSpeak Communication Library For Arduino
   
-  ThingSpeak ( https://www.thingspeak.com ) is a free IoT service for building
-  systems that collect, analyze, and react to their environments.
+  ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize and 
+  analyze live data streams in the cloud.
   
-  Copyright 2015, The MathWorks, Inc.
+  Copyright 2016, The MathWorks, Inc.
  
   See the accompaning licence file for licensing information.
 */

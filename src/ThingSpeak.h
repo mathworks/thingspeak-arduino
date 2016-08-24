@@ -4,8 +4,8 @@
   Enables an Arduino or other compatible hardware to write or read data to or from ThingSpeak,
   an open data platform for the Internet of Things with MATLAB analytics and visualization. 
 
-  ThingSpeak ( https://www.thingspeak.com ) is a free IoT service for building
-  systems that collect, analyze, and react to their environments.
+  ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize and 
+  analyze live data streams in the cloud.
   
   Copyright 2016, The MathWorks, Inc.
  
@@ -32,11 +32,11 @@
  * deeper historical insight.  Visit https://www.mathworks.com/hardware-support/thingspeak.html to learn more.
  * 
  * <h3>Compatible Hardware</h3>
- * * <a href="http://www.arduino.cc">Arduino</a> or compatible using a wired or Wi-Fi ethernet shield (we have tested with <a href="http://www.arduino.cc/en/Main/ArduinoBoardUno">Uno</a> and <a href="http://www.arduino.cc/en/Main/ArduinoBoardMega2560">Mega</a>), should work with Arduino WiFi Shield 101
+ * * <a href="http://www.arduino.cc">Arduino/Genuino</a> or compatible using a WiFi101 or Ethernet shield (we have tested with <a href="http://www.arduino.cc/en/Main/ArduinoBoardUno">Uno</a> and <a href="http://www.arduino.cc/en/Main/ArduinoBoardMega2560">Mega</a>)
  * * <a href="http://www.arduino.cc/en/Main/ArduinoBoardYun">Arduino Yun</a> running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later.  There are known issues with earlier versions.  Visit [this page](http://www.arduino.cc/en/Main/Software) to get the latest version.
+ * * <a href="http://www.arduino.cc/en/Main/ArduinoMKR1000">Arduino MKR1000</a>
  * * ESP8266 (tested with <a href="https://www.sparkfun.com/products/13711">SparkFun ESP8266 Thing - Dev Board</a> and <a href="http://www.seeedstudio.com/depot/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html">NodeMCU 1.0 module</a>)
- * * Particle (Formally Spark) Core, <a href="https://www.particle.io/prototype#photon">Photon</a>, and <a href="https://www.particle.io/prototype#electron">Electron</a>
- * 
+  * 
  * <h3>Examples</h3>
  * The library includes several examples to help you get started.  These are accessible in the Examples/ThingSpeak menu off the File menu in the Arduino IDE.
  * * <b>CheerLights:</b> Reads the latest <a href="http://www.cheerlights.com">CheerLights</a> color on ThingSpeak, and sets an RGB LED.
@@ -53,39 +53,14 @@
 //#define PRINT_DEBUG_MESSAGES
 //#define PRINT_HTTP
 
-#ifdef SPARK
-    // Create platform defines for Particle devices
-    #if PLATFORM_ID == 6
-        #define PARTICLE_PHOTON
-        #define PARTICLE_PHOTONELECTRON
-    #elif PLATFORM_ID == 10
-        #define PARTICLE_ELECTRON
-        #define PARTICLE_PHOTONELECTRON
-    #elif PLATFORM_ID == 0
-        #define PARTICLE_CORE
-    #endif
 
-    #include "math.h"
-    #include "application.h"
-    #ifdef PARTICLE_PHOTONELECTRON
-        extern char* dtoa(double val, unsigned char prec, char *sout);
-        // On spark photon, There is no itoa, so map to ltoa.
-        #include "string_convert.h"
-        #define itoa ltoa
-    #else
-        // On spark core, a long and an int are equivalent, and so there's no "ltoa" function defined.  Map it to itoa.
-        extern char * itoa(int a, char* buffer, unsigned char radix);
-        #define ltoa itoa
-        extern char *dtostrf (double val, signed char width, unsigned char prec, char *sout);
-    #endif
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
+  #include "Arduino.h"
+  #include <Client.h>
 #else
-	#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266)
-	  #include "Arduino.h"
-	  #include <Client.h>
-	#else
-      #error Only Arduino Yun, Uno/Mega/Due with either Wired or wi-fi Ethernet shield, ESP8266, and Spark Core/Photon/Electron are supported.
-	#endif
+  #error Only Arduino MKR1000, Yun, Uno/Mega/Due with either WiFi101 or Ethernet shield. ESP8266 also supported.
 #endif
+
 
 #define THINGSPEAK_URL "api.thingspeak.com"
 #define THINGSPEAK_IPADDRESS IPAddress(184,106,153,149)
@@ -99,16 +74,14 @@
     #endif
 #elif defined(ARDUINO_ARCH_ESP8266)
     #define TS_USER_AGENT "tslib-arduino/1.0 (ESP8266)"
-#elif defined(SPARK)
-    #ifdef PARTICLE_CORE
-        #define TS_USER_AGENT "tslib-arduino/1.0 (particle core)"
-    #elif defined(PARTICLE_PHOTON)
-        #define TS_USER_AGENT "tslib-arduino/1.0 (particle photon)"
-    #elif defined(PARTICLE_ELECTRON)
-        #define TS_USER_AGENT "tslib-arduino/1.0 (particle electron)"
-    #endif
-    #define SPARK_PUBLISH_TTL 60 // Spark "time to live" for published messages
-    #define SPARK_PUBLISH_TOPIC "thingspeak-debug"
+#elif defined(ARDUINO_SAMD_MKR1000)
+	#define TS_USER_AGENT "tslib-arduino/1.0 (arduino mkr1000)"
+#elif defined(ARDUINO_SAM_DUE)
+	#define TS_USER_AGENT "tslib-arduino/1.0 (arduino due)"
+#elif defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
+	#define TS_USER_AGENT "tslib-arduino/1.0 (arduino unknown sam or samd)"
+#else
+	#error "Platform not supported"
 #endif
 
 #define FIELDNUM_MIN 1
@@ -256,14 +229,9 @@ class ThingSpeakClass
 	 */
 	int writeField(unsigned long channelNumber, unsigned int field, int value, const char * writeAPIKey)
 	{
-#ifdef SPARK
-        // On Spark, int and long are the same, so map to the long version
-        return writeField(channelNumber, field, (long)value, writeAPIKey);
-#else
 		char valueString[10];  // int range is -32768 to 32768, so 7 bytes including terminator, plus a little extra
-        itoa(value, valueString, 10);
+		itoa(value, valueString, 10);
 		return writeField(channelNumber, field, valueString, writeAPIKey);
-#endif
 	};
 
 	/**
@@ -376,11 +344,7 @@ class ThingSpeakClass
 		if(value.length() > FIELDLENGTH_MAX) return ERR_OUT_OF_RANGE;
 		
 		#ifdef PRINT_DEBUG_MESSAGES
-		  #ifdef SPARK
-            Particle.publish(SPARK_PUBLISH_TOPIC, "writeField (" + String(channelNumber) + ", " + String(writeAPIKey) + ", " + String(field) + ", " + String(value) + ")", SPARK_PUBLISH_TTL, PRIVATE);
-          #else
 			Serial.print("ts::writeField (channelNumber: "); Serial.print(channelNumber); Serial.print(" writeAPIKey: "); Serial.print(writeAPIKey); Serial.print(" field: "); Serial.print(field); Serial.print(" value: \""); Serial.print(value); Serial.println("\")");
-		  #endif
 		#endif
 		String postMessage = String("field") + String(field) + "=" + value;
 		return writeRaw(channelNumber, postMessage, writeAPIKey);
@@ -420,15 +384,12 @@ class ThingSpeakClass
 	 */
 	int setField(unsigned int field, int value)
 	{
-#ifdef SPARK
-        // On Spark, int and long are the same, so map to the long version
-        return setField(field, (long)value);
-#else
+
 		char valueString[10];  // int range is -32768 to 32768, so 7 bytes including terminator
-	    itoa(value, valueString, 10);
+		itoa(value, valueString, 10);
 		
 		return setField(field, valueString);
-#endif
+
 	};
 
 	/**
@@ -580,11 +541,7 @@ class ThingSpeakClass
     int setField(unsigned int field, String value)
 	{
 		#ifdef PRINT_DEBUG_MESSAGES
-		  #ifdef SPARK
-            Particle.publish(SPARK_PUBLISH_TOPIC, "setField " + String(field) + " to " + String(value), SPARK_PUBLISH_TTL, PRIVATE);
-          #else
 			Serial.print("ts::setField   (field: "); Serial.print(field); Serial.print(" value: \""); Serial.print(value); Serial.println("\")");
-		  #endif
 		#endif
 		if(field < FIELDNUM_MIN || field > FIELDNUM_MAX) return ERR_INVALID_FIELD_NUM;
 		// Max # bytes for ThingSpeak field is 255 (UTF-8)
@@ -875,11 +832,7 @@ class ThingSpeakClass
 		postMessage = postMessage + String("&headers=false");
 
 		#ifdef PRINT_DEBUG_MESSAGES
-		  #ifdef SPARK
-            Particle.publish(SPARK_PUBLISH_TOPIC, "Post " + postMessage, SPARK_PUBLISH_TTL, PRIVATE);
-          #else
 			Serial.print("               POST \"");Serial.print(postMessage);Serial.println("\"");
-		  #endif
 		#endif
 
 		postMessage = postMessage + String("\n");
@@ -1168,6 +1121,7 @@ class ThingSpeakClass
  
 		String content = String();
 		int status = getHTTPResponse(content);
+			
 		this->lastReadStatus = status;
 
 
@@ -1321,11 +1275,7 @@ private:
 		    {
 			    // Connect to the server on port 80 (HTTP) at the URL address
 			    #ifdef PRINT_DEBUG_MESSAGES
-    		      #ifdef SPARK
-                    Particle.publish(SPARK_PUBLISH_TOPIC, "Attempt Connect to URL " + String(this->customHostName), SPARK_PUBLISH_TTL, PRIVATE);
-                  #else
 				    Serial.print("               Connect to ");Serial.print(this->customHostName);Serial.print(" ...");
-			      #endif
 			    #endif
 			    connectSuccess = client->connect(customHostName,this->port);
 		    }
@@ -1334,19 +1284,11 @@ private:
 		#ifdef PRINT_DEBUG_MESSAGES
 		if (connectSuccess)
 		{
-    	    #ifdef SPARK
-              Particle.publish(SPARK_PUBLISH_TOPIC, "Connection Success", SPARK_PUBLISH_TTL, PRIVATE);
-            #else
-		      Serial.println("Success.");
-		    #endif
+			Serial.println("Success.");
 		}
 		else
 		{
-    	    #ifdef SPARK
-              Particle.publish(SPARK_PUBLISH_TOPIC, "Connection Failure", SPARK_PUBLISH_TTL, PRIVATE);
-            #else
-  			  Serial.println("Failed.");
-  			#endif
+			Serial.println("Failed.");
 		}
 		#endif
 		return connectSuccess;
@@ -1392,21 +1334,13 @@ private:
 		if(!client->find(const_cast<char *>("HTTP/1.1")))
 		{
 			#ifdef PRINT_HTTP
-                #ifdef SPARK
-                    Particle.publish(SPARK_PUBLISH_TOPIC, "ERROR: Didn't find HTTP/1.1", SPARK_PUBLISH_TTL, PRIVATE);
-                #else
-    				Serial.println("ERROR: Didn't find HTTP/1.1");
-    			#endif
+				Serial.println("ERROR: Didn't find HTTP/1.1");
     		#endif
 			return ERR_BAD_RESPONSE; // Couldn't parse response (didn't find HTTP/1.1)
 		}
 		int status = client->parseInt();
 		#ifdef PRINT_HTTP
-            #ifdef SPARK
-                Particle.publish(SPARK_PUBLISH_TOPIC, "Got Status of " + String(status), SPARK_PUBLISH_TTL, PRIVATE);
-            #else
-    			Serial.print("Got Status of ");Serial.println(status);
-    		#endif
+			Serial.print("Got Status of ");Serial.println(status);
 		#endif
 		if(status != OK_SUCCESS)
 		{
@@ -1416,49 +1350,29 @@ private:
 		if(!client->find(const_cast<char *>("\r\n")))
 		{
 			#ifdef PRINT_HTTP
-                #ifdef SPARK
-                    Particle.publish(SPARK_PUBLISH_TOPIC, "ERROR: Didn't find end of status line", SPARK_PUBLISH_TTL, PRIVATE);
-                #else
-    				Serial.println("ERROR: Didn't find end of status line");
-    			#endif
+    			Serial.println("ERROR: Didn't find end of status line");
 			#endif
 			return ERR_BAD_RESPONSE;
 		}
 		#ifdef PRINT_HTTP
-            #ifdef SPARK
-                Particle.publish(SPARK_PUBLISH_TOPIC, "Found end of status line", SPARK_PUBLISH_TTL, PRIVATE);
-            #else
-    			Serial.println("Found end of status line");
-    	    #endif
+    		Serial.println("Found end of status line");
 		#endif
 
 		if(!client->find(const_cast<char *>("\n\r\n")))
 		{
 			#ifdef PRINT_HTTP
-                #ifdef SPARK
-                    Particle.publish(SPARK_PUBLISH_TOPIC, "ERROR: Didn't find end of header", SPARK_PUBLISH_TTL, PRIVATE);
-                #else
-    				Serial.println("ERROR: Didn't find end of header");
-    			#endif
+				Serial.println("ERROR: Didn't find end of header");
 			#endif
 			return ERR_BAD_RESPONSE;
 		}
 		#ifdef PRINT_HTTP
-            #ifdef SPARK
-                Particle.publish(SPARK_PUBLISH_TOPIC, "Found end of header", SPARK_PUBLISH_TTL, PRIVATE);
-            #else
-			    Serial.println("Found end of header");
-			#endif
+			Serial.println("Found end of header");
 		#endif
 		// This is a workaround to a bug in the Spark implementation of String
 		String tempString = client->readStringUntil('\r');
 		response = tempString;
 		#ifdef PRINT_HTTP
-            #ifdef SPARK
-                Particle.publish(SPARK_PUBLISH_TOPIC, "Response: \"" + tempString + "\"", SPARK_PUBLISH_TTL, PRIVATE);
-            #else
-    			Serial.print("Response: \"");Serial.print(response);Serial.println("\"");
-			#endif
+    		Serial.print("Response: \"");Serial.print(response);Serial.println("\"");
 		#endif
 		return status;
 	};
@@ -1471,11 +1385,11 @@ private:
 			// Out of range
 			return ERR_OUT_OF_RANGE;
 		}
-		// Given that the resolution of Spark is 1 / 2^12, or ~0.00024 volts, assume that 5 places right of decimal should be sufficient for most applications
-        #ifdef PARTICLE_PHOTONELECTRON
-          //Photon doesn't have a dtostrf, but does have dtoa
-          dtoa((double)value,5, valueString);
-        #else
+		// assume that 5 places right of decimal should be sufficient for most applications
+
+        #if defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
+		  sprintf(valueString, "%.5f", value);
+		#else
 		  dtostrf(value,1,5, valueString);
         #endif
 		return OK_SUCCESS;
