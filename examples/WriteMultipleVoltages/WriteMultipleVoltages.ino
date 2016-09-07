@@ -123,6 +123,8 @@ void loop() {
     pinVoltage = analogRead(A7) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
     ThingSpeak.setField(8,pinVoltage);
   #endif
+  
+  ThingSpeak.setStatus("Hello Status");
 
   // Write the fields that you've set all at once.
   ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);  
