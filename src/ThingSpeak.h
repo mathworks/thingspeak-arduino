@@ -835,15 +835,15 @@ class ThingSpeakClass
 			Serial.print("               POST \"");Serial.print(postMessage);Serial.println("\"");
 		#endif
 
-		postMessage = postMessage + String("\n");
+		postMessage = postMessage + String("\r\n");
 
 		// Post data to thingspeak
-		if(!this->client->print("POST /update HTTP/1.1\n")) return abortWriteRaw();
+		if(!this->client->print("POST /update HTTP/1.1\r\n")) return abortWriteRaw();
 		if(!writeHTTPHeader(writeAPIKey)) return abortWriteRaw();
-		if(!this->client->print("Content-Type: application/x-www-form-urlencoded\n")) return abortWriteRaw();
+		if(!this->client->print("Content-Type: application/x-www-form-urlencoded\r\n")) return abortWriteRaw();
 		if(!this->client->print("Content-Length: ")) return abortWriteRaw();
 		if(!this->client->print(postMessage.length())) return abortWriteRaw();
-		if(!this->client->print("\n\n")) return abortWriteRaw();
+		if(!this->client->print("\r\n\r\n")) return abortWriteRaw();
 		if(!this->client->print(postMessage)) return abortWriteRaw();
   
 		String entryIDText = String();
@@ -1115,9 +1115,9 @@ class ThingSpeakClass
 		// Post data to thingspeak
 		if(!this->client->print("GET ")) return abortReadRaw();
 		if(!this->client->print(URL)) return abortReadRaw();
-		if(!this->client->print(" HTTP/1.1\n")) return abortReadRaw();
+		if(!this->client->print(" HTTP/1.1\r\n")) return abortReadRaw();
 		if(!writeHTTPHeader(readAPIKey)) return abortReadRaw();
-		if(!this->client->print("\n")) return abortReadRaw();
+		if(!this->client->print("\r\n")) return abortReadRaw();
  
 		String content = String();
 		int status = getHTTPResponse(content);
@@ -1300,21 +1300,21 @@ private:
         {
 		    if (!this->client->print("Host: ")) return false;
 		    if (!this->client->print(this->customHostName)) return false;
-		    if (!this->client->print("\n")) return false;
+		    if (!this->client->print("\r\n")) return false;
         }
         else
         {
-		    if (!this->client->print("Host: api.thingspeak.com\n")) return false;
+		    if (!this->client->print("Host: api.thingspeak.com\r\n")) return false;
         }
-		if (!this->client->print("Connection: close\n")) return false;
+		if (!this->client->print("Connection: close\r\n")) return false;
 		if (!this->client->print("User-Agent: ")) return false;
 		if (!this->client->print(TS_USER_AGENT)) return false;
-		if (!this->client->print("\n")) return false;
+		if (!this->client->print("\r\n")) return false;
 		if(NULL != APIKey)
 		{
 			if (!this->client->print("X-THINGSPEAKAPIKEY: ")) return false;
 			if (!this->client->print(APIKey)) return false;
-			if (!this->client->print("\n")) return false;
+			if (!this->client->print("\r\n")) return false;
 		}
 		return true;
 	};
@@ -1358,7 +1358,7 @@ private:
     		Serial.println("Found end of status line");
 		#endif
 
-		if(!client->find(const_cast<char *>("\n\r\n")))
+		if(!client->find(const_cast<char *>("\r\n\r\n")))
 		{
 			#ifdef PRINT_HTTP
 				Serial.println("ERROR: Didn't find end of header");
