@@ -9,7 +9,7 @@
   
   This test use the ArduinoUnit 2.1.0 unit test framework.  Visit https://github.com/mmurdoch/arduinounit to learn more.
   
-  Copyright 2016, The MathWorks, Inc.
+  Copyright 2017, The MathWorks, Inc.
   
   Documentation for the ThingSpeak Communication Library for Arduino is in the extras/documentation folder where the library was installed.
   See the accompaning licence.txt file for licensing information.
@@ -50,8 +50,8 @@
   #endif
 #endif
 
-unsigned long testChannelNumber = 31461;
-const char * testChannelWriteAPIKey = "LD79EOAAWRVYF04Y";
+unsigned long testChannelNumber = 209617;
+const char * testChannelWriteAPIKey = "514SX5OBP2OFEPL2";
 
 #define WRITE_DELAY_FOR_THINGSPEAK 15000
 

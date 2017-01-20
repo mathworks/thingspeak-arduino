@@ -9,7 +9,7 @@
   
   This test use the ArduinoUnit 2.1.0 unit test framework.  Visit https://github.com/mmurdoch/arduinounit to learn more.
   
-  Copyright 2016, The MathWorks, Inc.
+  Copyright 2017, The MathWorks, Inc.
   
   Documentation for the ThingSpeak Communication Library for Arduino is in the extras/documentation folder where the library was installed.
   See the accompaning licence.txt file for licensing information.
@@ -53,8 +53,8 @@
 
 
 
-unsigned long testChannelNumber = 31461;
-const char * testChannelWriteAPIKey = "LD79EOAAWRVYF04Y";
+unsigned long testChannelNumber = 209617;
+const char * testChannelWriteAPIKey = "514SX5OBP2OFEPL2";
 
 test(beginCase) 
 {
@@ -68,9 +68,10 @@ test(beginCase)
 
 test(badAddresses) 
 {
-  // Test for valid, but incorrect, URL (www.mathworks.com) that gives a 404 response
+  // Test for valid, but incorrect, URL (www.mathworks.com)
   assertTrue(ThingSpeak.begin(client,"www.mathworks.com",80));
-  assertEqual(ERR_BADURL, ThingSpeak.writeField(testChannelNumber, 1, (float)1.0, testChannelWriteAPIKey) );
+  // www.mathworks.com will sometimes sometimes return a 404 or a 301 depending on server settings.  Test the negative case instead.
+  assertNotEqual(OK_SUCCESS, ThingSpeak.writeField(testChannelNumber, 1, (float)1.0, testChannelWriteAPIKey) );
   
   // Test for non-existant URL (http://www.iwishthiswebsitewerereal.com/)
   #ifdef USE_ETHERNET_SHIELD

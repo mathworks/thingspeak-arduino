@@ -1,7 +1,7 @@
-<!--   ThingSpeak(TM) Communication Library For Arduino, ESP8266, and Particle
-  ThingSpeak ( https://www.thingspeak.com ) is a free IoT service for building
-  systems that collect, analyze, and react to their environments.
-  Copyright 2016, The MathWorks, Inc.
+<!--   ThingSpeak(TM) Communication Library For Arduino and ESP8266
+  ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize and 
+  analyze live data streams in the cloud.
+  Copyright 2017, The MathWorks, Inc.
   See the accompaning licence file for licensing information.-->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -9,7 +9,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>ThingSpeak Communication Library For Arduino, ESP8266, and Particle</title>
+<title>ThingSpeak Communication Library For Arduino and ESP8266</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -23,7 +23,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ThingSpeak Communication Library</div>
-   <div id="projectbrief">Enables an Arduino, ESP8266, or Particle to write or read data to or from ThingSpeak&trade;</div>
+   <div id="projectbrief">Enables an Arduino or ESP8266 to write or read data to or from ThingSpeak&trade;</div>
   </td>
   <td valign="middle" align="right" id="projectlogo"><img alt="Logo" src="ThingSpeakLogo.jpg"/></td>
  </tr>
@@ -50,29 +50,61 @@
       <li><a href="functions_func.html"><span>Functions</span></a></li>
     </ul>
   </div>
+  <div id="navrow4" class="tabs3">
+    <ul class="tablist">
+      <li><a href="#index_b"><span>b</span></a></li>
+      <li><a href="#index_g"><span>g</span></a></li>
+      <li><a href="#index_r"><span>r</span></a></li>
+      <li><a href="#index_s"><span>s</span></a></li>
+      <li class="current"><a href="#index_w"><span>w</span></a></li>
+    </ul>
+  </div>
 </div><!-- top -->
 <div class="contents">
-<div class="textblock">Here is a list of all documented struct and union fields with links to the struct/union documentation for each field:</div><ul>
+<div class="textblock">Here is a list of all documented struct and union fields with links to the struct/union documentation for each field:</div>
+
+<h3><a class="anchor" id="index_b"></a>- b -</h3><ul>
 <li>begin()
 : <a class="el" href="class_thing_speak_class.html#a7375bc37b4cbf132751439f5fcafd1ba">ThingSpeakClass</a>
 </li>
+</ul>
+
+
+<h3><a class="anchor" id="index_g"></a>- g -</h3><ul>
 <li>getLastReadStatus()
 : <a class="el" href="class_thing_speak_class.html#a549941b4b0000a2ba89de94f038ed577">ThingSpeakClass</a>
 </li>
+</ul>
+
+
+<h3><a class="anchor" id="index_r"></a>- r -</h3><ul>
+<li>readCreatedAt()
+: <a class="el" href="class_thing_speak_class.html#a518a485a4cba6cf6a61b5bbd431e74d8">ThingSpeakClass</a>
+</li>
 <li>readFloatField()
-: <a class="el" href="class_thing_speak_class.html#a02cd79a65f1229711801fac5aec158b4">ThingSpeakClass</a>
+: <a class="el" href="class_thing_speak_class.html#ac65345864040b8f067a6d0e73a8dccfa">ThingSpeakClass</a>
 </li>
 <li>readIntField()
-: <a class="el" href="class_thing_speak_class.html#adb2ba704f38e591a6a391f7aa1850818">ThingSpeakClass</a>
+: <a class="el" href="class_thing_speak_class.html#a1241ae5b3e08b1751495f2e45dabcc46">ThingSpeakClass</a>
 </li>
 <li>readLongField()
-: <a class="el" href="class_thing_speak_class.html#aff3c2e94e85da016fb8c82432e015d1b">ThingSpeakClass</a>
+: <a class="el" href="class_thing_speak_class.html#aa1660fbf6444ca06dc744a244905f6d9">ThingSpeakClass</a>
 </li>
 <li>readRaw()
 : <a class="el" href="class_thing_speak_class.html#a578758c62a821dc9197ec6a3fdc0f7bc">ThingSpeakClass</a>
 </li>
+<li>readStatus()
+: <a class="el" href="class_thing_speak_class.html#ac658ac00936801802c7c4338aaa41de7">ThingSpeakClass</a>
+</li>
 <li>readStringField()
 : <a class="el" href="class_thing_speak_class.html#a7ed5914c2f5c7d84672cdaae3547da96">ThingSpeakClass</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_s"></a>- s -</h3><ul>
+<li>setCreatedAt()
+: <a class="el" href="class_thing_speak_class.html#aac2f328fe502083168a324c371174c0e">ThingSpeakClass</a>
 </li>
 <li>setElevation()
 : <a class="el" href="class_thing_speak_class.html#a1e9cc3c21e0a7360310aba628ef586c9">ThingSpeakClass</a>
@@ -86,6 +118,16 @@
 <li>setLongitude()
 : <a class="el" href="class_thing_speak_class.html#a8cb07c25c717a5acc5d8de60b19c0c3e">ThingSpeakClass</a>
 </li>
+<li>setStatus()
+: <a class="el" href="class_thing_speak_class.html#a4dbd25a21942a5d866ae652942aa6dcc">ThingSpeakClass</a>
+</li>
+<li>setTwitterTweet()
+: <a class="el" href="class_thing_speak_class.html#ad24e983546aa401c56237b3e13900e30">ThingSpeakClass</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_w"></a>- w -</h3><ul>
 <li>writeField()
 : <a class="el" href="class_thing_speak_class.html#a24fa89e20ef8b3314ad8270c1f81dd2d">ThingSpeakClass</a>
 </li>
@@ -98,10 +140,10 @@
 </ul>
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.9.1-->
-<!--   ThingSpeak(TM) Communication Library For Arduino, ESP8266, and Particle
-  ThingSpeak ( https://www.thingspeak.com ) is a free IoT service for building
-  systems that collect, analyze, and react to their environments.
-  Copyright 2016, The MathWorks, Inc.
+<!--   ThingSpeak(TM) Communication Library For Arduino and ESP8266
+  ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize and 
+  analyze live data streams in the cloud.
+  Copyright 2017, The MathWorks, Inc.
   See the accompaning licence file for licensing information.-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
@@ -110,7 +152,7 @@
           See the accompaning licence file for licensing information
         </td>
         <td align="right" width='50%'>
-          Copyright &copy; 2016 <a target=_top href=http://www.mathworks.com>The MathWorks, Inc.</a><br>
+          Copyright &copy; 2017 <a target=_top href=http://www.mathworks.com>The MathWorks, Inc.</a><br>
         </td>
       </tr></table>
 </small></address>

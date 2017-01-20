@@ -9,7 +9,7 @@
   
   This test use the ArduinoUnit 2.1.0 unit test framework.  Visit https://github.com/mmurdoch/arduinounit to learn more.
   
-  Copyright 2016, The MathWorks, Inc.
+  Copyright 2017, The MathWorks, Inc.
   
   Documentation for the ThingSpeak Communication Library for Arduino is in the extras/documentation folder where the library was installed.
   See the accompaning licence.txt file for licensing information.
@@ -50,16 +50,35 @@
   #endif
 #endif
 
-unsigned long testPublicChannelNumber = 12397;
-unsigned long testPrivateChannelNumber = 31461;
-const char * testPrivateChannelReadAPIKey = "NKX4Z5JGO4M5I18A";
-const char * testPrivateChannelWriteAPIKey = "LD79EOAAWRVYF04Y";
+unsigned long testPublicChannelNumber = 209617;
+const char * testPublicChannelWriteAPIKey = "514SX5OBP2OFEPL2";
+
+unsigned long testPrivateChannelNumber = 209615;
+const char * testPrivateChannelReadAPIKey = "D3MJBCYVNFX4Z2A8";
+const char * testPrivateChannelWriteAPIKey = "KI8B7DJTWXLZ6EBV";
 
 #define WRITE_DELAY_FOR_THINGSPEAK 15000
 
-
-test(readPublicFieldCase) 
+test(readPrivateFieldCase) 
 {
+  // Test basic value read -- should give anything but 0
+  assertNotEqual(0.0,ThingSpeak.readFloatField(testPrivateChannelNumber, 1, testPrivateChannelReadAPIKey));
+  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+
+  // Test read with invalid API key
+  // * Using the wrong API key causes a connection failure on the next attempt to connect to ThingSpeak
+  // * The cause is unknown, disable this test for now
+  //assertEqual(0.0,ThingSpeak.readFloatField(testPrivateChannelNumber, 1, "AFAKEAPIKEYFAKEX"));
+  //assertEqual(ERR_BADAPIKEY,ThingSpeak.getLastReadStatus()); 
+}
+
+
+#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_SAMD_MKR1000)  // Only the mega and mkr1000 has enough memory for all these tests
+test(readPublicFieldCase) 
+{ 
+
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+  assertEqual(OK_SUCCESS, ThingSpeak.writeField(testPublicChannelNumber, 4, (float)1.0, testPublicChannelWriteAPIKey));
   
   // Test basic value read -- should give anything but 0
   assertNotEqual(0.0,ThingSpeak.readFloatField(testPublicChannelNumber, 4));
@@ -78,28 +97,15 @@ test(readPublicFieldCase)
   #endif
 
   // Test read of invalid channel #
-  assertEqual(0.0,ThingSpeak.readFloatField(0, 1));
-  assertEqual(ERR_BADURL,ThingSpeak.getLastReadStatus());
-  assertEqual(0.0,ThingSpeak.readFloatField(4294967295L, 1));
-  assertEqual(ERR_BAD,ThingSpeak.getLastReadStatus());
-}
-
-
-test(readPrivateFieldCase) 
-{
-  // Test basic value read -- should give anything but 0
-  assertNotEqual(0.0,ThingSpeak.readFloatField(testPrivateChannelNumber, 1, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
-
-  // Test read with invalid API key
   // * Using the wrong API key causes a connection failure on the next attempt to connect to ThingSpeak
   // * The cause is unknown, disable this test for now
-  //assertEqual(0.0,ThingSpeak.readFloatField(testPrivateChannelNumber, 1, "AFAKEAPIKEYFAKEX"));
-  //assertEqual(ERR_BADAPIKEY,ThingSpeak.getLastReadStatus());
-  
+  //assertEqual(0.0,ThingSpeak.readFloatField(0, 1));
+  //assertEqual(ERR_BADURL,ThingSpeak.getLastReadStatus());
+  //assertEqual(0.0,ThingSpeak.readFloatField(4294967295L, 1));
+  //assertEqual(ERR_BAD,ThingSpeak.getLastReadStatus());  
 }
 
-#if defined(ARDUINO_AVR_MEGA2560) || defined(ARDUINO_SAMD_MKR1000)  // Only the mega and mkr1000 has enough memory for all these tests
+
 test(ReadFloatFieldCase) 
 {
   // Always to ensure that rate limit isn't hit
@@ -261,7 +267,57 @@ test(ReadStringFieldCase)
   assertEqual(String(NEG_INF_STR),ThingSpeak.readStringField(testPrivateChannelNumber, 7, testPrivateChannelReadAPIKey));
   assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
 }
+
+test(readStatusPublicCase)
+{
+  // Always wait 15 seconds to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+
+  ThingSpeak.setStatus("abcdef");
+  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPublicChannelNumber, testPublicChannelWriteAPIKey)); // string
+	//assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(String("abcdef"),ThingSpeak.readStatus(testPublicChannelNumber));		
+}
+
+test(readStatusPrivateCase)
+{
+  // Always wait 15 seconds to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+
+  ThingSpeak.setStatus("abcdef");
+  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
+	//assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(String("abcdef"),ThingSpeak.readStatus(testPrivateChannelNumber, testPrivateChannelReadAPIKey));
+}
+
+test(readCreatedAtPublicCase)
+{
+  // Always wait 15 seconds to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+
+  ThingSpeak.setCreatedAt("2016-12-21T11:11:11Z");
+  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPublicChannelNumber, testPublicChannelWriteAPIKey)); // string
+	//assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(String("2016-12-21T11:11:11Z"),ThingSpeak.readCreatedAt(testPublicChannelNumber));
+}
+
+test(readCreatedAtPrivateCase)
+{
+  // Always wait 15 seconds to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+
+  ThingSpeak.setCreatedAt("2016-12-21T11:11:11Z");
+  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
+	//assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(String("2016-12-21T11:11:11Z"),ThingSpeak.readCreatedAt(testPrivateChannelNumber, testPrivateChannelReadAPIKey));
+}
+
+
 #endif // Mega and MKR1000 only tests
+
+
+
+
 
 void setup()
 {

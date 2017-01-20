@@ -9,7 +9,7 @@
   
   This test use the ArduinoUnit 2.1.0 unit test framework.  Visit https://github.com/mmurdoch/arduinounit to learn more.
   
-  Copyright 2016, The MathWorks, Inc.
+  Copyright 2017, The MathWorks, Inc.
   
   Documentation for the ThingSpeak Communication Library for Arduino is in the extras/documentation folder where the library was installed.
   See the accompaning licence.txt file for licensing information.
@@ -50,8 +50,8 @@
   #endif
 #endif
 
-unsigned long testChannelNumber = 31461;
-const char * testChannelWriteAPIKey = "LD79EOAAWRVYF04Y";
+unsigned long testChannelNumber = 209617;
+const char * testChannelWriteAPIKey = "514SX5OBP2OFEPL2";
 
 #define WRITE_DELAY_FOR_THINGSPEAK 15000
 
@@ -186,6 +186,175 @@ test(setFieldStringCase)
   }
   
   assertEqual(ERR_OUT_OF_RANGE, ThingSpeak.setField(3, longString));
+  
+  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testChannelNumber, testChannelWriteAPIKey));
+}
+
+test(setStatusCharStarCase)
+{
+  // Always wait to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+  
+   // Test empty string
+  assertEqual(OK_SUCCESS, ThingSpeak.setStatus(""));
+
+  char longString[300];
+
+  // Test max string
+  memset(longString, '0',255);
+  longString[255] = 0;
+  assertEqual(OK_SUCCESS, ThingSpeak.setStatus(longString));
+
+  // Test long string
+  memset(longString, '0',sizeof(longString)/sizeof(longString[0]) - 1);
+  longString[sizeof(longString)] = 0;
+ 
+  assertEqual(ERR_OUT_OF_RANGE, ThingSpeak.setStatus(longString));
+  
+  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testChannelNumber, testChannelWriteAPIKey));
+  
+}
+
+test(setStatusStringCase)
+{
+  // Always wait to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+
+  // Test empty string
+  assertEqual(OK_SUCCESS, ThingSpeak.setStatus(String()));
+
+  unsigned int numChar = 300;
+  String longString;
+  longString.reserve(numChar);
+
+  // Test max string
+  for(unsigned int i = 0; i < 255; i++)
+  {
+    longString += '0';
+  }
+  assertEqual(OK_SUCCESS, ThingSpeak.setStatus(longString));
+
+  // Test long string
+  longString.reserve(numChar);
+  for(unsigned int i = 0; i < numChar; i++)
+  {
+    longString += '0';
+  }
+  
+  assertEqual(ERR_OUT_OF_RANGE, ThingSpeak.setStatus(longString));
+  
+  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testChannelNumber, testChannelWriteAPIKey));
+}
+
+test(setTwitterTweetTwitterCharStarCase)
+{
+  // Always wait to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+  
+   // Test empty string
+  assertEqual(OK_SUCCESS, ThingSpeak.setTwitterTweet("",""));
+
+  char longString[300];
+  char normalString[32] = "normalString";
+
+  // Test max string
+  memset(longString, '0',255);
+  longString[255] = 0;
+  assertEqual(OK_SUCCESS, ThingSpeak.setTwitterTweet(longString, normalString));
+  assertEqual(OK_SUCCESS, ThingSpeak.setTwitterTweet(normalString, longString));
+
+  // Test long string
+  memset(longString, '0',sizeof(longString)/sizeof(longString[0]) - 1);
+  longString[sizeof(longString)] = 0;
+ 
+  assertEqual(ERR_OUT_OF_RANGE, ThingSpeak.setTwitterTweet(longString, normalString));
+  assertEqual(ERR_OUT_OF_RANGE, ThingSpeak.setTwitterTweet(normalString, longString));
+  
+  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testChannelNumber, testChannelWriteAPIKey));
+}
+
+test(setTwitterTweetStringCase)
+{
+  // Always wait to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+
+  // Test empty string
+  assertEqual(OK_SUCCESS, ThingSpeak.setTwitterTweet(String(),String()));
+
+  unsigned int numChar = 300;
+  String longString;
+  longString.reserve(numChar);
+
+  String normalString = "normalString";
+
+  // Test max string
+  for(unsigned int i = 0; i < 255; i++)
+  {
+    longString += '0';
+  }
+  assertEqual(OK_SUCCESS, ThingSpeak.setTwitterTweet(longString, normalString));
+  assertEqual(OK_SUCCESS, ThingSpeak.setTwitterTweet(normalString, longString));
+
+  // Test long string
+  longString.reserve(numChar);
+  for(unsigned int i = 0; i < numChar; i++)
+  {
+    longString += '0';
+  }
+  
+  assertEqual(ERR_OUT_OF_RANGE, ThingSpeak.setTwitterTweet(longString, normalString));
+  assertEqual(ERR_OUT_OF_RANGE, ThingSpeak.setTwitterTweet(normalString, longString));
+  
+  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testChannelNumber, testChannelWriteAPIKey));
+}
+
+test(setCreatedAtCharStarCase)
+{
+  // Always wait to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+  
+   // Test empty string
+  assertEqual(OK_SUCCESS, ThingSpeak.setCreatedAt(""));
+
+  char longString[300];
+
+  // Test timestamp string
+  strcpy(longString,"2016-12-21T11:11:11Z");
+  assertEqual(OK_SUCCESS, ThingSpeak.setCreatedAt(longString));
+
+  // Test long string
+  memset(longString, '0',sizeof(longString)/sizeof(longString[0]) - 1);
+  longString[sizeof(longString)] = 0;
+ 
+  assertEqual(ERR_OUT_OF_RANGE, ThingSpeak.setCreatedAt(longString));
+  
+  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testChannelNumber, testChannelWriteAPIKey));
+}
+
+test(setCreatedAtStringCase)
+{
+  // Always wait to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+
+  // Test empty string
+  assertEqual(OK_SUCCESS, ThingSpeak.setCreatedAt(String()));
+
+  unsigned int numChar = 300;
+  String longString;
+  longString.reserve(numChar);
+
+  // Test timestamp string
+  longString = "2016-12-21T11:11:11Z";
+  assertEqual(OK_SUCCESS, ThingSpeak.setCreatedAt(longString));
+
+  // Test long string
+  longString.reserve(numChar);
+  for(unsigned int i = 0; i < numChar; i++)
+  {
+    longString += '0';
+  }
+  
+  assertEqual(ERR_OUT_OF_RANGE, ThingSpeak.setCreatedAt(longString));
   
   assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testChannelNumber, testChannelWriteAPIKey));
 }
