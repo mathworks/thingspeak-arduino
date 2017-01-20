@@ -5,11 +5,16 @@ setField	KEYWORD2
 setLatitude	KEYWORD2
 setLongitude	KEYWORD2
 setElevation	KEYWORD2
+setStatus	KEYWORD2
+setTwitterTweet	KEYWORD2
+setCreatedAt	KEYWORD2
 writeRaw	KEYWORD2
 writeFields	KEYWORD2
 readFloatField	KEYWORD2
 readIntField	KEYWORD2
 readLongField	KEYWORD2
 readStringField	KEYWORD2
+readStatus	KEYWORD2
+readCreatedAt	KEYWORD2
 readRaw	KEYWORD2
 getLastReadStatus	KEYWORD2

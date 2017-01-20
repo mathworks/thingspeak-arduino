@@ -1,4 +1,4 @@
-Copyright :copyright: 2016, The MathWorks, Inc.
+Copyright :copyright: 2017, The MathWorks, Inc.
 
 All rights reserved.
 
