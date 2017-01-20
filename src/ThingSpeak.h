@@ -1201,7 +1201,7 @@ class ThingSpeakClass
 			Serial.print("               POST \"");Serial.print(postMessage);Serial.println("\"");
 		#endif
 
-		postMessage = postMessage + String("\n");
+		postMessage = postMessage + String("\r\n");
 
 		// Post data to thingspeak
 		if(!this->client->print("POST /update HTTP/1.1\r\n")) return abortWriteRaw();
@@ -1844,7 +1844,7 @@ private:
     		Serial.println("Found end of status line");
 		#endif
 
-		if(!client->find(const_cast<char *>("\n\r\n")))
+		if(!client->find(const_cast<char *>("\r\n\r\n")))
 		{
 			#ifdef PRINT_HTTP
 				Serial.println("ERROR: Didn't find end of header");
