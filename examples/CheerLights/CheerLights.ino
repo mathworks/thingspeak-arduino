@@ -8,7 +8,7 @@
   ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize and 
   analyze live data streams in the cloud.
   
-  Copyright 2016, The MathWorks, Inc.
+  Copyright 2017, The MathWorks, Inc.
 
   Documentation for the ThingSpeak Communication Library for Arduino is in the extras/documentation folder where the library was installed.
   See the accompaning licence file for licensing information.
