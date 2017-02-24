@@ -16,5 +16,12 @@ readLongField	KEYWORD2
 readStringField	KEYWORD2
 readStatus	KEYWORD2
 readCreatedAt	KEYWORD2
+readEntry	KEYWORD2
+getFloatField	KEYWORD2
+getIntField	KEYWORD2
+getLongField	KEYWORD2
+getStringField	KEYWORD2
+getStatus	KEYWORD2
+getCreatedAt	KEYWORD2
 readRaw	KEYWORD2
 getLastReadStatus	KEYWORD2
