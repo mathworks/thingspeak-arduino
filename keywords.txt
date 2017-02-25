@@ -16,5 +16,6 @@ readLongField	KEYWORD2
 readStringField	KEYWORD2
 readStatus	KEYWORD2
 readCreatedAt	KEYWORD2
+setReadTimezone	KEYWORD2
 readRaw	KEYWORD2
 getLastReadStatus	KEYWORD2

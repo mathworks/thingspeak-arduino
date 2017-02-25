@@ -111,6 +111,7 @@ class ThingSpeakClass
 	ThingSpeakClass()
 	{
 		resetWriteFields();
+		this->nextReadTimezone = "";
 	    this->lastReadStatus = OK_SUCCESS;
 	};
 
@@ -143,6 +144,7 @@ class ThingSpeakClass
 	this->setClient(&client);
 	this->setServer(customHostName, port);
 	resetWriteFields();
+	this->nextReadTimezone = "";
 	this->lastReadStatus = OK_SUCCESS;
 	return true;
 	};
@@ -176,6 +178,7 @@ class ThingSpeakClass
 		this->setClient(&client);
 		this->setServer(customIP, port);
 		resetWriteFields();
+		this->nextReadTimezone = "";
 		this->lastReadStatus = OK_SUCCESS;
 		return true;
 	};
@@ -207,6 +210,7 @@ class ThingSpeakClass
 		this->setClient(&client);
 		this->setServer();
 		resetWriteFields();
+		this->nextReadTimezone = "";
 		this->lastReadStatus = OK_SUCCESS;
 		return true;
 	};
@@ -1463,10 +1467,11 @@ class ThingSpeakClass
 	};
 	
 	/**
-	 * @brief Read the created-at timestamp associated with the latest update to a private ThingSpeak channel
+	 * @brief Read the created-at timestamp associated with the latest update to a private ThingSpeak channel. Use setReadTimezone() to set a timezone for the creation date
 	 * @param channelNumber Channel number
 	 * @param readAPIKey Read API key associated with the channel.  *If you share code with others, do _not_ share this key*
 	 * @return Value read (UTF8 string). An empty string is returned if there was no created-at timestamp written to the channel or in case of an error.  Use getLastReadStatus() to get more specific information.
+	 * @see setReadTimezone()
 	 * @code
 		void loop() {
 		  String value = ThingSpeak.readCreatedAt(myChannelNumber);
@@ -1488,9 +1493,10 @@ class ThingSpeakClass
 	};
 
 	/**
-	 * @brief Read the created-at timestamp associated with the latest update to a private ThingSpeak channel
+	 * @brief Read the created-at timestamp associated with the latest update to a private ThingSpeak channel. Use setReadTimezone() to set a timezone for the creation date
 	 * @param channelNumber Channel number
 	 * @return Value read (UTF8 string). An empty string is returned if there was no created-at timestamp written to the channel or in case of an error.  Use getLastReadStatus() to get more specific information.
+	 * @see setReadTimezone()
 	 * @code
 		void loop() {
 		  String value = ThingSpeak.readCreatedAt(myChannelNumber);
@@ -1504,6 +1510,73 @@ class ThingSpeakClass
 	{
 		return readCreatedAt(channelNumber, NULL);
 	};
+	
+	/**
+	 * @brief Set the timezone to use for the next reading.
+	 * @param timezone Desired timezone to be used with the next read as a char. The timezone must be one of these: https://de.mathworks.com/help/thingspeak/time-zones-reference.html
+	 * @return HTTP status code of 200 if successful.  See getLastReadStatus() for other possible return values.
+	 * @code
+		void loop() {
+		  ThingSpeak.setReadTimezone("Europe/London");
+		  String value = ThingSpeak.readCreatedAt(myChannelNumber);
+		  Serial.print("Latest update timestamp is: "); 
+		  Serial.print(value);
+		  delay(30000);
+		}
+	 * @endcode
+	 */
+	int setReadTimezone(const char * timezone)
+	{
+		return setReadTimezone(String(timezone));
+	}
+	
+	/**
+	 * @brief Set the timezone to use for the next reading.
+	 * @param timezone Desired timezone to be used with the next read as a String. The timezone must be one of these: https://de.mathworks.com/help/thingspeak/time-zones-reference.html
+	 * @return HTTP status code of 200 if successful.  See getLastReadStatus() for other possible return values.
+	 * @code
+		void loop() {
+		  ThingSpeak.setReadTimezone("Europe/London");
+		  String value = ThingSpeak.readCreatedAt(myChannelNumber);
+		  Serial.print("Latest update timestamp is: "); 
+		  Serial.print(value);
+		  delay(30000);
+		}
+	 * @endcode
+	 */
+	int setReadTimezone(String timezone)
+	{
+		#ifdef PRINT_DEBUG_MESSAGES
+			Serial.print("ts::setReadTimezone(timezone: "); Serial.print(timezone); Serial.println("\")");
+		#endif
+		
+		// Max # bytes for ThingSpeak field is 255 (UTF-8)
+		if(timezone.length() > FIELDLENGTH_MAX) return ERR_OUT_OF_RANGE;
+		this->nextReadTimezone = timezone;
+		
+		return OK_SUCCESS;
+	}
+	
+	/**
+	 * @brief Resets the timezone to use for the next reading.
+	 * @return HTTP status code of 200 if successful.  See getLastReadStatus() for other possible return values.
+	 * @code
+		void loop() {
+		  ThingSpeak.setReadTimezone("Europe/London");
+		  String value = ThingSpeak.readCreatedAt(myChannelNumber);
+		  Serial.print("Latest update timestamp is: "); 
+		  Serial.print(value);
+		  
+		  ThingSpeak.resetReadTimezone();
+		  
+		  delay(30000);
+		}
+	 * @endcode
+	 */
+	int resetReadTimezone()
+	{
+		return setReadTimezone("");
+	}
 	
 	/**
 	 * @brief Read a raw response from a public ThingSpeak channel
@@ -1559,6 +1632,15 @@ class ThingSpeakClass
 		}
 
 		String URL = String("/channels/") + String(channelNumber) + URLSuffix;
+		
+		// Append timezone if given
+		if (this->nextReadTimezone.length() > 0) {
+			if (URL.indexOf('?', 0) == -1) {
+				URL = URL + "?timezone=" + this->nextReadTimezone;
+			} else {
+				URL = URL + "&timezone=" + this->nextReadTimezone;
+			}
+		}
 
 		#ifdef PRINT_DEBUG_MESSAGES
 			Serial.print("               GET \"");Serial.print(URL);Serial.println("\"");
@@ -1729,6 +1811,7 @@ private:
 	String nextWriteTwitter;
 	String nextWriteTweet;
 	String nextWriteCreatedAt;
+	String nextReadTimezone;
 
 	bool connectThingSpeak()
 	{
