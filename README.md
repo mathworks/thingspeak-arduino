@@ -34,6 +34,8 @@ In the Particle Web IDE, click the libraries tab, find ThingSpeak, and choose "I
 * Arduino MKR1000
 * ESP8266. Tested with [SparkFun ESP8266 Thing - Dev Board](https://www.sparkfun.com/products/13711) and [NodeMCU 1.0 module](http://www.seeedstudio.com/depot/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html)
 
+Note: For the WiFi101 Shield and MKR1000, use the WiFi101 library version 0.13.0 or older.  WiFi101 library version 0.14.0 and newer have a bug that stops this ThingSpeak library from working properly.   
+
 
 ## Examples:
 
