@@ -9,6 +9,8 @@
   
   This test use the ArduinoUnit 2.1.0 unit test framework.  Visit https://github.com/mmurdoch/arduinounit to learn more.
   
+  ArduinoUnit does not support ESP8266 or ESP32 and therefor these tests will not compile for those platforms.
+  
   Copyright 2017, The MathWorks, Inc.
   
   Documentation for the ThingSpeak Communication Library for Arduino is in the extras/documentation folder where the library was installed.
@@ -18,7 +20,7 @@
 //#define USE_WIFI101_SHIELD
 //#define USE_ETHERNET_SHIELD
 
-#if !defined(USE_WIFI101_SHIELD) && !defined(USE_ETHERNET_SHIELD) && !defined(ARDUINO_SAMD_MKR1000) && !defined(ARDUINO_AVR_YUN) && !defined(ARDUINO_ARCH_ESP8266)
+#if !defined(USE_WIFI101_SHIELD) && !defined(USE_ETHERNET_SHIELD) && !defined(ARDUINO_SAMD_MKR1000) && !defined(ARDUINO_AVR_YUN)
   #error "Uncomment the #define for either USE_WIFI101_SHIELD or USE_ETHERNET_SHIELD"
 #endif
 
@@ -29,14 +31,9 @@
     #include "YunClient.h"
     YunClient client;
 #else
-  #if defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_ARCH_ESP8266)
-    // Use WiFi
-    #ifdef ARDUINO_ARCH_ESP8266
-      #include <ESP8266WiFi.h>
-    #else
-      #include <SPI.h>
-      #include <WiFi101.h>
-    #endif
+  #if defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000)
+    #include <SPI.h>
+    #include <WiFi101.h>
     char ssid[] = "<YOURNETWORK>";    //  your network SSID (name) 
     char pass[] = "<YOURPASSWORD>";   // your network password   
     int status = WL_IDLE_STATUS;
@@ -368,7 +365,7 @@ void setup()
   #ifdef ARDUINO_AVR_YUN
     Bridge.begin();
   #else
-    #if defined(ARDUINO_ARCH_ESP8266) || defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000)
+    #if defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000)
       WiFi.begin(ssid, pass);
     #else
       Ethernet.begin(mac);

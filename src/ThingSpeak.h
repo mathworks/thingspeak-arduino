@@ -1,5 +1,5 @@
 /*
-  ThingSpeak(TM) Communication Library For Arduino and ESP8266
+  ThingSpeak(TM) Communication Library For Arduino, ESP8266 and ESP32
 
   Enables an Arduino or other compatible hardware to write or read data to or from ThingSpeak,
   an open data platform for the Internet of Things with MATLAB analytics and visualization. 
@@ -36,6 +36,7 @@
  * * <a href="http://www.arduino.cc/en/Main/ArduinoBoardYun">Arduino Yun</a> running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later.  There are known issues with earlier versions.  Visit [this page](http://www.arduino.cc/en/Main/Software) to get the latest version.
  * * <a href="http://www.arduino.cc/en/Main/ArduinoMKR1000">Arduino MKR1000</a>
  * * ESP8266 (tested with <a href="https://www.sparkfun.com/products/13711">SparkFun ESP8266 Thing - Dev Board</a> and <a href="http://www.seeedstudio.com/depot/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html">NodeMCU 1.0 module</a>)
+ * * <a href="http://www.sparkfun.com/products/13907">SparkFun ESP32 Thing</a>
   * 
  * <h3>Examples</h3>
  * The library includes several examples to help you get started.  These are accessible in the Examples/ThingSpeak menu off the File menu in the Arduino IDE.
@@ -54,11 +55,11 @@
 //#define PRINT_HTTP
 
 
-#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_ESP32)
   #include "Arduino.h"
   #include <Client.h>
 #else
-  #error Only Arduino MKR1000, Yun, Uno/Mega/Due with either WiFi101 or Ethernet shield. ESP8266 also supported.
+  #error Only Arduino MKR1000, Yun, Uno/Mega/Due with either WiFi101 or Ethernet shield. ESP8266 and ESP32 are also supported.
 #endif
 
 
@@ -80,6 +81,8 @@
 	#define TS_USER_AGENT "tslib-arduino/1.3 (arduino due)"
 #elif defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
 	#define TS_USER_AGENT "tslib-arduino/1.3 (arduino unknown sam or samd)"
+#elif defined(ARDUINO_ARCH_ESP32)
+	#define TS_USER_AGENT "tslib-arduino/1.3 (ESP32)"
 #else
 	#error "Platform not supported"
 #endif
@@ -103,7 +106,7 @@
 #define ERR_NOT_INSERTED        -401    // Point was not inserted (most probable cause is the rate limit of once every 15 seconds)
 
 /**
- * @brief Enables an Arduino, ESP8266 or other compatible hardware to write or read data to or from ThingSpeak, an open data platform for the Internet of Things with MATLAB analytics and visualization. 
+ * @brief Enables an Arduino, ESP8266, ESP32 or other compatible hardware to write or read data to or from ThingSpeak, an open data platform for the Internet of Things with MATLAB analytics and visualization. 
  */
 class ThingSpeakClass
 {

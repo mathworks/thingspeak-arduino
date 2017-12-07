@@ -19,7 +19,7 @@
 
 // ***********************************************************************************************************
 // This example selects the correct library to use based on the board selected under the Tools menu in the IDE.
-// Yun, Ethernet shield, WiFi101 shield, esp8266, and MXR1000 are all supported.
+// Yun, Ethernet shield, WiFi101 shield, esp8266, ESP32 and MKR1000 are all supported.
 // With Yun, the default is that you're using the Ethernet connection.
 // If you're using a wi-fi 101 or ethernet shield (http://www.arduino.cc/en/Main/ArduinoWiFiShield), uncomment the corresponding line below
 // ***********************************************************************************************************
@@ -28,7 +28,7 @@
 //#define USE_ETHERNET_SHIELD
 
 
-#if !defined(USE_WIFI101_SHIELD) && !defined(USE_ETHERNET_SHIELD) && !defined(ARDUINO_SAMD_MKR1000) && !defined(ARDUINO_AVR_YUN) && !defined(ARDUINO_ARCH_ESP8266)
+#if !defined(USE_WIFI101_SHIELD) && !defined(USE_ETHERNET_SHIELD) && !defined(ARDUINO_SAMD_MKR1000) && !defined(ARDUINO_AVR_YUN) && !defined(ARDUINO_ARCH_ESP8266) && !defined(ARDUINO_ARCH_ESP32)
   #error "Uncomment the #define for either USE_WIFI101_SHIELD or USE_ETHERNET_SHIELD"
 #endif
 
@@ -37,11 +37,13 @@
     #include "YunClient.h"
     YunClient client;
 #else
-  #if defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_ARCH_ESP8266)
+  #if defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
     // Use WiFi
     #ifdef ARDUINO_ARCH_ESP8266
       #include <ESP8266WiFi.h>
-    #else
+    #elif defined(ARDUINO_ARCH_ESP32)
+      #include <WiFi.h>
+	#else
       #include <SPI.h>
       #include <WiFi101.h>
     #endif
@@ -76,7 +78,7 @@ void setup() {
   #ifdef ARDUINO_AVR_YUN
     Bridge.begin();
   #else   
-    #if defined(ARDUINO_ARCH_ESP8266) || defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000)
+    #if defined(ARDUINO_ARCH_ESP8266) || defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_ARCH_ESP32)
       WiFi.begin(ssid, pass);
     #else
       Ethernet.begin(mac);

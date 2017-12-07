@@ -16,7 +16,8 @@
 
 // ***********************************************************************************************************
 // This example selects the correct library to use based on the board selected under the Tools menu in the IDE.
-// Yun, Ethernet shield, WiFi101 shield, esp8266, and MXR1000 are all supported.
+// Yun, Ethernet shield, WiFi101 shield, esp8266, ESP32 and MXR1000 are all supported. Please note, ADC analogRead() for ESP32 has not yet
+// been implemented in the SparkFun library.  It will always return 0.
 // With Yun, the default is that you're using the Ethernet connection.
 // If you're using a wi-fi 101 or ethernet shield (http://www.arduino.cc/en/Main/ArduinoWiFiShield), uncomment the corresponding line below
 // ***********************************************************************************************************
@@ -25,7 +26,7 @@
 //#define USE_ETHERNET_SHIELD
 
 
-#if !defined(USE_WIFI101_SHIELD) && !defined(USE_ETHERNET_SHIELD) && !defined(ARDUINO_SAMD_MKR1000) && !defined(ARDUINO_AVR_YUN) && !defined(ARDUINO_ARCH_ESP8266)
+#if !defined(USE_WIFI101_SHIELD) && !defined(USE_ETHERNET_SHIELD) && !defined(ARDUINO_SAMD_MKR1000) && !defined(ARDUINO_AVR_YUN) && !defined(ARDUINO_ARCH_ESP8266) && !defined(ARDUINO_ARCH_ESP32)
   #error "Uncomment the #define for either USE_WIFI101_SHIELD or USE_ETHERNET_SHIELD"
 #endif
 
@@ -33,11 +34,13 @@
     #include "YunClient.h"
     YunClient client;
 #else
-  #if defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_ARCH_ESP8266)
+  #if defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
     // Use WiFi
     #ifdef ARDUINO_ARCH_ESP8266
       #include <ESP8266WiFi.h>
-    #else
+    #elif defined(ARDUINO_ARCH_ESP32)
+      #include <WiFi.h>
+	#else
       #include <SPI.h>
       #include <WiFi101.h>
     #endif
@@ -70,6 +73,10 @@
   // On ESP8266:  0 - 1023 maps to 0 - 1 volts
   #define VOLTAGE_MAX 1.0
   #define VOLTAGE_MAXCOUNTS 1023.0
+#elif ARDUINO_ARCH_ESP32
+  // On ESP32:  0 - 4096 maps to 0 - 1 volts
+  #define VOLTAGE_MAX 1.0
+  #define VOLTAGE_MAXCOUNTS 4095.0
 #endif
 
 
@@ -88,7 +95,7 @@ void setup() {
   #ifdef ARDUINO_AVR_YUN
     Bridge.begin();
   #else   
-    #if defined(ARDUINO_ARCH_ESP8266) || defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000)
+    #if defined(ARDUINO_ARCH_ESP8266) || defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_ARCH_ESP32)
       WiFi.begin(ssid, pass);
     #else
       Ethernet.begin(mac);
@@ -103,10 +110,11 @@ void loop() {
   // Read the input on each pin, convert the reading, and set each field to be sent to ThingSpeak.
   // On Uno,Mega,Yun:  0 - 1023 maps to 0 - 5 volts
   // On ESP8266:  0 - 1023 maps to 0 - 1 volts
+   // On ESP32:  0 - 4095 maps to 0 - 1 volts, but will always return 0 as analogRead() has not been implemented yet
   // On MKR1000,Due: 0 - 4095 maps to 0 - 3.3 volts
   float pinVoltage = analogRead(A0) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
   ThingSpeak.setField(1,pinVoltage);
-  #ifndef ARDUINO_ARCH_ESP8266
+  #if !defined(ARDUINO_ARCH_ESP8266) && !defined(ARDUINO_ARCH_ESP32)
     // The ESP8266 only has one analog input, so skip this
     pinVoltage = analogRead(A1) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
     ThingSpeak.setField(2,pinVoltage);

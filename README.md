@@ -1,4 +1,4 @@
-#ThingSpeak Communication Library for Arduino and ESP8266
+#ThingSpeak Communication Library for Arduino, ESP8266 and ESP32
 
 This library enables an Arduino or other compatible hardware to write or read data to or from ThingSpeak, an open data platform for the Internet of Things with MATLAB analytics and visualization.
 
@@ -29,13 +29,12 @@ In the Particle Web IDE, click the libraries tab, find ThingSpeak, and choose "I
 
 ## Compatible Hardware:
 
-* Arduino/Genuino or compatible using a a WiFi101 or Ethernet shield (we have tested with Uno and Mega).
-* Arduino Yun running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later. There are known issues with earlier versions. Visit this page to get the latest version.
-* Arduino MKR1000
-* ESP8266. Tested with [SparkFun ESP8266 Thing - Dev Board](https://www.sparkfun.com/products/13711) and [NodeMCU 1.0 module](http://www.seeedstudio.com/depot/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html)
-
-Note: For the WiFi101 Shield and MKR1000, use the WiFi101 library version 0.13.0 or older.  WiFi101 library version 0.14.0 and newer have a bug that stops this ThingSpeak library from working properly.   
-
+* Arduino/Genuino or compatible using a WiFi101. Note: Use the WiFi101 library version 0.13.0 or older. WiFi101 library versions 0.14.0 and newer have a bug that stops this ThingSpeak library from working properly.
+* Arduino/Genuino or compatible using Ethernet shield (we have tested with Uno and Mega).
+* Arduino Yun running OpenWRT-Yun Release 1.5.3. Note: November 13th, 2014 or later. There are known issues with earlier versions. Visit this page to get the latest version.
+* Arduino MKR1000. Note: Use the WiFi101 library version 0.13.0 or older. WiFi101 library versions 0.14.0 and newer have a bug that stops this ThingSpeak library from working properly.
+* ESP8266. Tested with [SparkFun ESP8266 Thing - Dev Board](https://www.sparkfun.com/products/13711) and [NodeMCU 1.0 module](http://www.seeedstudio.com/depot/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html) 
+* ESP32. Tested with [SparkFun ESP32 Thing - Dev Board](https://www.sparkfun.com/products/13907)
 
 ## Examples:
 
