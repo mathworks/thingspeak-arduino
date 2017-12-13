@@ -17,7 +17,7 @@
 
 // ***********************************************************************************************************
 // This example selects the correct library to use based on the board selected under the Tools menu in the IDE.
-// Yun, Ethernet shield, WiFi101 shield, esp8266, ESP32, and MXR1000 are all supported.
+// Yun, Ethernet shield, WiFi101 shield, esp8266, ESP32, and MKR1000 are all supported.
 // With Yun, the default is that you're using the Ethernet connection.
 // If you're using a wi-fi 101 or ethernet shield (http://www.arduino.cc/en/Main/ArduinoWiFiShield), uncomment the corresponding line below
 // ***********************************************************************************************************
@@ -86,6 +86,7 @@ void setup() {
   #endif
   
   ThingSpeak.begin(client);
+  Serial.println("\nWaiting for first update...");
   delay(20000);  // Give the WiFi some time to connect
 }
 

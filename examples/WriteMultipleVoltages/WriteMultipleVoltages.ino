@@ -9,15 +9,15 @@
   Copyright 2017, The MathWorks, Inc.
   
   Documentation for the ThingSpeak Communication Library for Arduino is in the extras/documentation folder where the library was installed.
-  See the accompaning licence file for licensing information.
+  See the accompanying license file for licensing information.
 */
 
 #include "ThingSpeak.h"
 
 // ***********************************************************************************************************
 // This example selects the correct library to use based on the board selected under the Tools menu in the IDE.
-// Yun, Ethernet shield, WiFi101 shield, esp8266, ESP32 and MXR1000 are all supported. Please note, ADC analogRead() for ESP32 has not yet
-// been implemented in the SparkFun library.  It will always return 0.
+// Yun, Ethernet shield, WiFi101 shield and MKR1000 are supported. 
+// EPS8266 and ESP32 are not compatible with this example. 
 // With Yun, the default is that you're using the Ethernet connection.
 // If you're using a wi-fi 101 or ethernet shield (http://www.arduino.cc/en/Main/ArduinoWiFiShield), uncomment the corresponding line below
 // ***********************************************************************************************************
@@ -25,8 +25,11 @@
 //#define USE_WIFI101_SHIELD
 //#define USE_ETHERNET_SHIELD
 
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+	#error "EPS8266 and ESP32 are not compatible with this example."
+#endif
 
-#if !defined(USE_WIFI101_SHIELD) && !defined(USE_ETHERNET_SHIELD) && !defined(ARDUINO_SAMD_MKR1000) && !defined(ARDUINO_AVR_YUN) && !defined(ARDUINO_ARCH_ESP8266) && !defined(ARDUINO_ARCH_ESP32)
+#if !defined(USE_WIFI101_SHIELD) && !defined(USE_ETHERNET_SHIELD) && !defined(ARDUINO_SAMD_MKR1000) && !defined(ARDUINO_AVR_YUN) 
   #error "Uncomment the #define for either USE_WIFI101_SHIELD or USE_ETHERNET_SHIELD"
 #endif
 
@@ -34,16 +37,10 @@
     #include "YunClient.h"
     YunClient client;
 #else
-  #if defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+  #if defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000)
     // Use WiFi
-    #ifdef ARDUINO_ARCH_ESP8266
-      #include <ESP8266WiFi.h>
-    #elif defined(ARDUINO_ARCH_ESP32)
-      #include <WiFi.h>
-	#else
-      #include <SPI.h>
-      #include <WiFi101.h>
-    #endif
+    #include <SPI.h>
+    #include <WiFi101.h>
     char ssid[] = "<YOURNETWORK>";    //  your network SSID (name) 
     char pass[] = "<YOURPASSWORD>";   // your network password
     int status = WL_IDLE_STATUS;
@@ -69,14 +66,6 @@
   // On Due:  0 - 1023 maps to 0 - 3.3 volts
   #define VOLTAGE_MAX 3.3
   #define VOLTAGE_MAXCOUNTS 1023.0  
-#elif ARDUINO_ARCH_ESP8266
-  // On ESP8266:  0 - 1023 maps to 0 - 1 volts
-  #define VOLTAGE_MAX 1.0
-  #define VOLTAGE_MAXCOUNTS 1023.0
-#elif ARDUINO_ARCH_ESP32
-  // On ESP32:  0 - 4096 maps to 0 - 1 volts
-  #define VOLTAGE_MAX 1.0
-  #define VOLTAGE_MAXCOUNTS 4095.0
 #endif
 
 
@@ -95,8 +84,8 @@ void setup() {
   #ifdef ARDUINO_AVR_YUN
     Bridge.begin();
   #else   
-    #if defined(ARDUINO_ARCH_ESP8266) || defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_ARCH_ESP32)
-      WiFi.begin(ssid, pass);
+    #if defined(USE_WIFI101_SHIELD) || defined(ARDUINO_SAMD_MKR1000)
+	WiFi.begin(ssid, pass);
     #else
       Ethernet.begin(mac);
     #endif
@@ -109,28 +98,9 @@ void setup() {
 void loop() {
   // Read the input on each pin, convert the reading, and set each field to be sent to ThingSpeak.
   // On Uno,Mega,Yun:  0 - 1023 maps to 0 - 5 volts
-  // On ESP8266:  0 - 1023 maps to 0 - 1 volts
-   // On ESP32:  0 - 4095 maps to 0 - 1 volts, but will always return 0 as analogRead() has not been implemented yet
   // On MKR1000,Due: 0 - 4095 maps to 0 - 3.3 volts
   float pinVoltage = analogRead(A0) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
   ThingSpeak.setField(1,pinVoltage);
-  #if !defined(ARDUINO_ARCH_ESP8266) && !defined(ARDUINO_ARCH_ESP32)
-    // The ESP8266 only has one analog input, so skip this
-    pinVoltage = analogRead(A1) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-    ThingSpeak.setField(2,pinVoltage);
-    pinVoltage = analogRead(A2) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-    ThingSpeak.setField(3,pinVoltage);
-    pinVoltage = analogRead(A3) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-    ThingSpeak.setField(4,pinVoltage);
-    pinVoltage = analogRead(A4) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-    ThingSpeak.setField(5,pinVoltage);
-    pinVoltage = analogRead(A5) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-    ThingSpeak.setField(6,pinVoltage);
-    pinVoltage = analogRead(A6) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-    ThingSpeak.setField(7,pinVoltage);
-    pinVoltage = analogRead(A7) * (VOLTAGE_MAX / VOLTAGE_MAXCOUNTS);
-    ThingSpeak.setField(8,pinVoltage);
-  #endif
 
   // Write the fields that you've set all at once.
   ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);  
