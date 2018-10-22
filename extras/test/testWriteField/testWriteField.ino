@@ -3,18 +3,20 @@
   testWriteField unit test
   
   Unit Test for the writeField function in the ThingSpeak Communication Library for Arduino
-
-  ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize and 
-  analyze live data streams in the cloud.
   
   This test use the ArduinoUnit 2.1.0 unit test framework.  Visit https://github.com/mmurdoch/arduinounit to learn more.
   
   ArduinoUnit does not support ESP8266 or ESP32 and therefor these tests will not compile for those platforms.
   
-  Copyright 2017, The MathWorks, Inc.
+  ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize, and 
+  analyze live data streams in the cloud. Visit https://www.thingspeak.com to sign up for a free account and create a channel.  
   
-  Documentation for the ThingSpeak Communication Library for Arduino is in the extras/documentation folder where the library was installed.
-  See the accompaning licence.txt file for licensing information.
+  Documentation for the ThingSpeak Communication Library for Arduino is in the README.md folder where the library was installed.
+  See https://www.mathworks.com/help/thingspeak/index.html for the full ThingSpeak documentation.
+  
+  For licensing information, see the accompanying license file.
+  
+  Copyright 2018, The MathWorks, Inc.
 */
 
 //#define USE_WIFI101_SHIELD
