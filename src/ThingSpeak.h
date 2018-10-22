@@ -7,7 +7,7 @@
   ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize and 
   analyze live data streams in the cloud.
   
-  Copyright 2017, The MathWorks, Inc.
+  Copyright 2018, The MathWorks, Inc.
  
   See the accompaning licence file for licensing information.
 */
@@ -32,36 +32,33 @@
  * deeper historical insight.  Visit https://www.mathworks.com/hardware-support/thingspeak.html to learn more.
  * 
  * <h3>Compatible Hardware</h3>
- * * <a href="http://www.arduino.cc">Arduino/Genuino</a> or compatible using a WiFi101 or Ethernet shield (we have tested with <a href="http://www.arduino.cc/en/Main/ArduinoBoardUno">Uno</a> and <a href="http://www.arduino.cc/en/Main/ArduinoBoardMega2560">Mega</a>)
- * * <a href="http://www.arduino.cc/en/Main/ArduinoBoardYun">Arduino Yun</a> running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later.  There are known issues with earlier versions.  Visit [this page](http://www.arduino.cc/en/Main/Software) to get the latest version.
+ * * <a href="http://www.arduino.cc">Arduino/Genuino</a> or compatible using a <a href="http://store.arduino.cc/usa/arduino-wifi-shield">WiFi Shield</a>, <a href="https://www.arduino.cc/en/Guide/ArduinoWiFiShield101">WiFi Shield 101</a> or Ethernet Shield or <a href="http://store.arduino.cc/usa/arduino-mkr-eth-shield">MKR ETH Shield</a> (we have tested with <a href="http://www.arduino.cc/en/Main/ArduinoBoardUno">Uno</a> and <a href="http://www.arduino.cc/en/Main/ArduinoBoardMega2560">Mega</a>)
+ * * <a href="http://www.arduino.cc/en/Main/ArduinoBoardYun">Arduino Yún</a> and <a href="http://store.arduino.cc/usa/arduino-yun-rev-2">Yún Rev2</a> running OpenWRT-Yun Release 1.5.3 (November 13th, 2014) or later.  There are known issues with earlier versions.  Visit [this page](http://www.arduino.cc/en/Main/Software) to get the latest version.
  * * <a href="http://www.arduino.cc/en/Main/ArduinoMKR1000">Arduino MKR1000</a>
+ * * <a href="http://store.arduino.cc/usa/mkr-gsm-1400">Arduino GSM 1400
+ * * <a href="http://store.arduino.cc/usa/arduino-vidor-4000">Arduino VIDOR 4000
+ * * <a href="http://store.arduino.cc/usa/arduino-mkr-wifi-1010">Arduino MKR1010
+ * * ESP32 (tested with <a href="https://www.sparkfun.com/products/13907">SparkFun ESP32 Thing)
  * * ESP8266 (tested with <a href="https://www.sparkfun.com/products/13711">SparkFun ESP8266 Thing - Dev Board</a> and <a href="http://www.seeedstudio.com/depot/NodeMCU-v2-Lua-based-ESP8266-development-kit-p-2415.html">NodeMCU 1.0 module</a>)
  * * <a href="http://www.sparkfun.com/products/13907">SparkFun ESP32 Thing</a>
   * 
  * <h3>Examples</h3>
- * The library includes several examples to help you get started.  These are accessible in the Examples/ThingSpeak menu off the File menu in the Arduino IDE.
- * * <b>CheerLights:</b> Reads the latest <a href="http://www.cheerlights.com">CheerLights</a> color on ThingSpeak, and sets an RGB LED.
- * * <b>ReadLastTemperature:</b> Reads the latest temperature from the public <a href="https://thingspeak.com/channels/12397">MathWorks weather station</a> in Natick, MA on ThingSpeak.
- * * <b>ReadPrivateChannel:</b> Reads the latest voltage value from a private channel on ThingSpeak.
- * * <b>ReadWeatherStation:</b> Reads the latest weather data from the public <a href="https://thingspeak.com/channels/12397">MathWorks weather station</a> in Natick, MA on ThingSpeak.
- * * <b>WriteMultipleVoltages:</b> Reads analog voltages from pins 0-7 and writes them to the 8 fields of a channel on ThingSpeak.
- * * <b>WriteVoltage:</b> Reads an analog voltage from pin 0, converts to a voltage, and writes it to a channel on ThingSpeak.
+ * The library includes several examples to help you get started.  These are accessible in Examples > ThingSpeak menu of the Arduino IDE.
+ * * <b>ReadField:</b> Reading from a public channel and a private channel on ThingSpeak.
+ * * <b>WriteSingleField:<b> Writing a value to a single field on ThingSpeak.
+ * * <b>WriteMultipleFields:<b> Writing values to multiple fields and status in one transaction with ThingSpeak. 
  */
 
 #ifndef ThingSpeak_h
 #define ThingSpeak_h
 
+#define TS_VER "1.4"
+
 //#define PRINT_DEBUG_MESSAGES
 //#define PRINT_HTTP
 
-
-#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_ESP32)
-  #include "Arduino.h"
-  #include <Client.h>
-#else
-  #error Only Arduino MKR1000, Yun, Uno/Mega/Due with either WiFi101 or Ethernet shield. ESP8266 and ESP32 are also supported.
-#endif
-
+#include "Arduino.h"
+#include <Client.h>
 
 #define THINGSPEAK_URL "api.thingspeak.com"
 #define THINGSPEAK_IPADDRESS IPAddress(184,106,153,149)
@@ -69,22 +66,28 @@
 
 #ifdef ARDUINO_ARCH_AVR
     #ifdef ARDUINO_AVR_YUN
-        #define TS_USER_AGENT "tslib-arduino/1.3 (arduino yun)"
+        #define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino yun)"
     #else
-        #define TS_USER_AGENT "tslib-arduino/1.3 (arduino uno or mega)"
+        #define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino uno or mega)"
     #endif
 #elif defined(ARDUINO_ARCH_ESP8266)
-    #define TS_USER_AGENT "tslib-arduino/1.3 (ESP8266)"
+    #define TS_USER_AGENT "tslib-arduino/" TS_VER " (ESP8266)"
 #elif defined(ARDUINO_SAMD_MKR1000)
-	#define TS_USER_AGENT "tslib-arduino/1.3 (arduino mkr1000)"
+	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino mkr1000)"
 #elif defined(ARDUINO_SAM_DUE)
-	#define TS_USER_AGENT "tslib-arduino/1.3 (arduino due)"
-#elif defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_ARCH_SAM)
-	#define TS_USER_AGENT "tslib-arduino/1.3 (arduino unknown sam or samd)"
+	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino due)"
+#elif defined(ARDUINO_ARCH_SAMD) 
+	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino samd)"
+#elif defined(ARDUINO_ARCH_SAM))
+	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino sam)"
+#elif defined(ARDUINO_ARCH_SAMD_BETA)
+	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino samd_beta )"
 #elif defined(ARDUINO_ARCH_ESP32)
-	#define TS_USER_AGENT "tslib-arduino/1.3 (ESP32)"
+	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (ESP32)"
+#elif defined(ARDUINO_ARCH_SAMD_BETA)
+	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino vidor)"
 #else
-	#error "Platform not supported"
+	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (unknown)"
 #endif
 
 #define FIELDNUM_MIN 1
@@ -1710,7 +1713,7 @@ private:
 	void setServer()
 	{
 		#ifdef PRINT_DEBUG_MESSAGES
-			Serial.print("ts::setServer  (default)");
+			Serial.println("ts::setServer  (default)");
 		#endif
 		this->customIP = INADDR_NONE;
 		this->customHostName = NULL;
