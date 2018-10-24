@@ -78,7 +78,7 @@
 	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino due)"
 #elif defined(ARDUINO_ARCH_SAMD) 
 	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino samd)"
-#elif defined(ARDUINO_ARCH_SAM))
+#elif defined(ARDUINO_ARCH_SAM)
 	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino sam)"
 #elif defined(ARDUINO_ARCH_SAMD_BETA)
 	#define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino samd_beta )"
