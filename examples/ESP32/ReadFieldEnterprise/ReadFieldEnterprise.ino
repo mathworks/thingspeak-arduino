@@ -34,7 +34,7 @@
 #define EAP_PASSWORD "your_password"
 const char* ssid = "ssid_name"; // SSID under WPA/WPA2 Enterprise
 WiFiClient  client;
-
+int counter = 0;
 // Weather station channel details
 unsigned long weatherStationChannelNumber = SECRET_CH_ID_WEATHER_STATION;
 unsigned int temperatureFieldNumber = 4;
@@ -52,7 +52,20 @@ void setup() {
   esp_wifi_sta_wpa2_ent_set_username((uint8_t *)EAP_IDENTITY, strlen(EAP_IDENTITY)); //provide username
   esp_wifi_sta_wpa2_ent_set_password((uint8_t *)EAP_PASSWORD, strlen(EAP_PASSWORD)); //provide password
   esp_wpa2_config_t config = WPA2_CONFIG_INIT_DEFAULT(); //set config settings to default
-  esp_wifi_sta_wpa2_ent_enable(&config); //set config settings to enable function   
+  esp_wifi_sta_wpa2_ent_enable(&config); //set config settings to enable function
+   WiFi.begin(ssid); //connect to wifi
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+    counter++;
+    if(counter>=60){ //after 30 seconds timeout - reset board
+      ESP.restart();
+    }
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address set: "); 
+  Serial.println(WiFi.localIP()); //print LAN IP
   ThingSpeak.begin(client);  // Initialize ThingSpeak
 }
 
@@ -60,16 +73,20 @@ void loop() {
 
   int statusCode = 0;
   
-  // Connect or reconnect to WiFi
-  if(WiFi.status() != WL_CONNECTED){
-    Serial.print("Attempting to connect to SSID: ");
-    Serial.println(ssid);
-    while(WiFi.status() != WL_CONNECTED){
-      WiFi.begin(ssid); // Connect to WPA/WPA2 Enterprisenetwork
-      Serial.print(".");
-      delay(5000);     
-    } 
-    Serial.println("\nConnected");
+ if (WiFi.status() == WL_CONNECTED) { //if we are connected to Eduroam network
+    counter = 0; //reset counter
+    Serial.println("Wifi is still connected with IP: "); 
+    Serial.println(WiFi.localIP());   //inform user about his IP address
+  }else if (WiFi.status() != WL_CONNECTED) { //if we lost connection, retry
+    WiFi.begin(ssid);      
+  }
+  while (WiFi.status() != WL_CONNECTED) { //during lost connection, print dots
+    delay(500);
+    Serial.print(".");
+    counter++;
+    if(counter>=60){ //30 seconds timeout - reset board
+    ESP.restart();
+    }
   }
 
   // Read in field 4 of the public channel recording the temperature
