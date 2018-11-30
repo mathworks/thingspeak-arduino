@@ -52,7 +52,7 @@ void setup() {
     Serial.println("Please upgrade the firmware");
   }
     
-  ThingSpeak.begin(client);  Initialize ThingSpeal
+  ThingSpeak.begin(client);  //Initialize ThingSpeak
 }
 
 void loop() {
