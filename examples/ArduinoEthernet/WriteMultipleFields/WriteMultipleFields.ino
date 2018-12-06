@@ -1,7 +1,7 @@
 /*
   WriteMultipleFields
   
-  Description: Writes values to fields 1,2,3,4 and status in a single ThingSpeak update every 20 seconds.
+  Description: Writes values to fields 1,2,3 and 4  in a single ThingSpeak update every 20 seconds.
   
   Hardware: Arduino Ethernet
   
@@ -43,7 +43,6 @@ int number1 = 0;
 int number2 = random(0,100);
 int number3 = random(0,100);
 int number4 = random(0,100);
-String myStatus = "";
 
 void setup() {
   Ethernet.init(10);  // Most Arduino Ethernet hardware
@@ -83,19 +82,6 @@ void loop() {
   ThingSpeak.setField(3, number3);
   ThingSpeak.setField(4, number4);
 
-  // figure out the status message
-  if(number1 > number2){
-    myStatus = String("field1 is greater than field2"); 
-  }
-  else if(number1 < number2){
-    myStatus = String("field1 is less than field2");
-  }
-  else{
-    myStatus = String("field1 equals field2");
-  }
-  
-  // set the status
-  ThingSpeak.setStatus(myStatus);
   
   // write to the ThingSpeak channel 
   int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
