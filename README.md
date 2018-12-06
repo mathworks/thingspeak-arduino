@@ -196,16 +196,11 @@ Initializes the ThingSpeak library and network settings.
 bool begin (client) // defaults to ThingSpeak.com
 ```
 ```
-bool begin (client, customHostName, port)
-```
-```
-bool begin (client, customIP, port)
+bool begin (client, port)
 ```
 | Parameter      | Type         | Description                                            |          
 |----------------|:-------------|:-------------------------------------------------------|
 | client         | Client &     | TCPClient created earlier in the sketch                |
-| customHostName | const char * | Host name of a custom install of ThingSpeak            |
-| customIP       | IPAddress    | IP address of a custom install of ThingSpeak           |
 | port           | unsigned int | Port number to use with a custom install of ThingSpeak |
 
 ### Returns
