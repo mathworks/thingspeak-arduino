@@ -26,9 +26,10 @@
 */
 
 #include "ThingSpeak.h"
-#include "YunClient.h"
 #include "secrets.h"
-YunClient client;
+#include <BridgeClient.h>
+
+BridgeClient client;
 
 // Weather station channel details
 unsigned long weatherStationChannelNumber = SECRET_CH_ID_WEATHER_STATION;
