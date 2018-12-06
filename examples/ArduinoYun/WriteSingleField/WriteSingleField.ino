@@ -24,10 +24,10 @@
 */
 
 #include "ThingSpeak.h"
-#include "YunClient.h"
 #include "secrets.h"
-YunClient client;
+#include <BridgeClient.h>
 
+BridgeClient client;
 unsigned long myChannelNumber = SECRET_CH_ID;
 const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
 
