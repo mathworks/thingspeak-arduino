@@ -1,16 +1,14 @@
 /*
-  ReadField
+  WriteMultipleFields
   
-  Description: Demonstates reading from a public channel which requires no API key and reading from a private channel which requires a read API key.
-               The value read from the public channel is the current outside temperature at MathWorks headquaters in Natick, MA.  The value from the
-               private channel is an example counter that increments every 10 seconds.
+  Description: Writes values to fields 1,2,3,4 and status in a single ThingSpeak update every 20 seconds.
   
-  Hardware: Arduino MKR WiFi 1010
+  Hardware: Arduino Uno WiFi Rev2
   
   !!! IMPORTANT - Modify the secrets.h file for this project with your network connection and ThingSpeak channel details. !!!
   
   Note:
-  - Requires WiFiNINA library
+  - Requires WiFiNINA library.
   - This example is written for a network using WPA encryption. For WEP or WPA, change the WiFi.begin() call accordingly.
   
   ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize, and 
@@ -33,14 +31,15 @@ char pass[] = SECRET_PASS;   // your network password
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 WiFiClient  client;
 
-// Weather station channel details
-unsigned long weatherStationChannelNumber = SECRET_CH_ID_WEATHER_STATION;
-unsigned int temperatureFieldNumber = 4;
+unsigned long myChannelNumber = SECRET_CH_ID;
+const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
 
-// Counting channel details
-unsigned long counterChannelNumber = SECRET_CH_ID_COUNTER;
-const char * myCounterReadAPIKey = SECRET_READ_APIKEY_COUNTER;
-unsigned int counterFieldNumber = 1; 
+// Initialize our values
+int number1 = 0;
+int number2 = random(0,100);
+int number3 = random(0,100);
+int number4 = random(0,100);
+String myStatus = "";
 
 void setup() {
   Serial.begin(115200);  // Initialize serial
@@ -62,8 +61,6 @@ void setup() {
 
 void loop() {
 
-  int statusCode = 0;
-  
   // Connect or reconnect to WiFi
   if(WiFi.status() != WL_CONNECTED){
     Serial.print("Attempting to connect to SSID: ");
@@ -73,35 +70,46 @@ void loop() {
       Serial.print(".");
       delay(5000);     
     } 
-    Serial.println("\nConnected");
+    Serial.println("\nConnected.");
   }
 
-  // Read in field 4 of the public channel recording the temperature
-  float temperatureInF = ThingSpeak.readFloatField(weatherStationChannelNumber, temperatureFieldNumber);  
+  // set the fields with the values
+  ThingSpeak.setField(1, number1);
+  ThingSpeak.setField(2, number2);
+  ThingSpeak.setField(3, number3);
+  ThingSpeak.setField(4, number4);
 
-  // Check the status of the read operation to see if it was successful
-  statusCode = ThingSpeak.getLastReadStatus();
-  if(statusCode == 200){
-    Serial.println("Temperature at MathWorks HQ: " + String(temperatureInF) + " deg F");
+  // figure out the status message
+  if(number1 > number2){
+    myStatus = String("field1 is greater than field2"); 
+  }
+  else if(number1 < number2){
+    myStatus = String("field1 is less than field2");
   }
   else{
-    Serial.println("Problem reading channel. HTTP error code " + String(statusCode)); 
+    myStatus = String("field1 equals field2");
   }
   
-  delay(15000); // No need to read the temperature too often.
-
-  // Read in field 1 of the private channel which is a counter  
-  long count = ThingSpeak.readLongField(counterChannelNumber, counterFieldNumber, myCounterReadAPIKey);  
-
-   // Check the status of the read operation to see if it was successful
-  statusCode = ThingSpeak.getLastReadStatus();
-  if(statusCode == 200){
-    Serial.println("Counter: " + String(count));
+  // set the status
+  ThingSpeak.setStatus(myStatus);
+  
+  // write to the ThingSpeak channel
+  int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
+  if(x == 200){
+    Serial.println("Channel update successful.");
   }
   else{
-    Serial.println("Problem reading channel. HTTP error code " + String(statusCode)); 
+    Serial.println("Problem updating channel. HTTP error code " + String(x));
   }
   
-  delay(15000); // No need to read the counter too often.
+  // change the values
+  number1++;
+  if(number1 > 99){
+    number1 = 0;
+  }
+  number2 = random(0,100);
+  number3 = random(0,100);
+  number4 = random(0,100);
   
+  delay(20000); // Wait 20 seconds to update the channel again
 }

@@ -3,14 +3,14 @@
   
   Description: Writes a value to a channel on ThingSpeak every 20 seconds.
   
-  Hardware: Arduino MKR1000
+  Hardware: Arduino Uno WiFi Rev2
   
   !!! IMPORTANT - Modify the secrets.h file for this project with your network connection and ThingSpeak channel details. !!!
   
   Note:
-  - Requires WiFi101 library version 0.15.3 or newer.
+  - Requires WiFiNINA library.
   - This example is written for a network using WPA encryption. For WEP or WPA, change the WiFi.begin() call accordingly.
-	
+    
   ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize, and 
   analyze live data streams in the cloud. Visit https://www.thingspeak.com to sign up for a free account and create a channel.  
   
@@ -23,10 +23,10 @@
 */
 
 #include "ThingSpeak.h"
-#include <WiFi101.h>
+#include <WiFiNINA.h>
 #include "secrets.h"
 
-char ssid[] = SECRET_SSID;   // your network SSID (name) 
+char ssid[] = SECRET_SSID;    //  your network SSID (name) 
 char pass[] = SECRET_PASS;   // your network password
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 WiFiClient  client;
@@ -37,8 +37,21 @@ const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
 int number = 0;
 
 void setup() {
-  Serial.begin(115200);      // Initialize serial 
-  ThingSpeak.begin(client);  // Initialize ThingSpeak 
+  Serial.begin(115200);  // Initialize serial
+
+  // check for the WiFi module:
+  if (WiFi.status() == WL_NO_MODULE) {
+    Serial.println("Communication with WiFi module failed!");
+    // don't continue
+    while (true);
+  }
+
+  String fv = WiFi.firmwareVersion();
+  if (fv != "1.0.0") {
+    Serial.println("Please upgrade the firmware");
+  }
+    
+  ThingSpeak.begin(client);  //Initialize ThingSpeak
 }
 
 void loop() {
@@ -48,17 +61,17 @@ void loop() {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(SECRET_SSID);
     while(WiFi.status() != WL_CONNECTED){
-      WiFi.begin(ssid, pass);  // Connect to WPA/WPA2 network. Change this line if using open or WEP network
+      WiFi.begin(ssid, pass); // Connect to WPA/WPA2 network. Change this line if using open or WEP network
       Serial.print(".");
       delay(5000);     
     } 
     Serial.println("\nConnected.");
   }
-
+  
   // Write to ThingSpeak. There are up to 8 fields in a channel, allowing you to store up to 8 different
   // pieces of information in a channel.  Here, we write to field 1.
   int x = ThingSpeak.writeField(myChannelNumber, 1, number, myWriteAPIKey);
-   if(x == 200){
+  if(x == 200){
     Serial.println("Channel update successful.");
   }
   else{

@@ -24,7 +24,6 @@
 */
 
 #include "ThingSpeak.h"
-#include <SPI.h>
 #include <WiFi.h>
 #include "secrets.h"
 

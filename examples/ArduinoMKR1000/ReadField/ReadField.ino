@@ -10,8 +10,7 @@
   !!! IMPORTANT - Modify the secrets.h file for this project with your network connection and ThingSpeak channel details. !!!
   
   Note:
-  - Requires WiFi101 library. Use the WiFi101 library version 0.13.0 or older. WiFi101 library versions 0.14.0 and newer have a bug
-    that stops this ThingSpeak library from working properly.
+  - Requires WiFi101 library version 0.15.3 or newer.
   - This example is written for a network using WPA encryption. For WEP or WPA, change the WiFi.begin() call accordingly.
   
   ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize, and 
@@ -26,7 +25,6 @@
 */
 
 #include "ThingSpeak.h"
-#include <SPI.h>
 #include <WiFi101.h>
 #include "secrets.h"
 

@@ -23,7 +23,6 @@
 
 
 #include "ThingSpeak.h"
-#include <SPI.h>
 #include <Ethernet.h>
 #include "secrets.h"
 

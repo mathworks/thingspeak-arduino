@@ -1,16 +1,15 @@
 /*
-  WriteMultipleFields
+  WriteSingleField
   
-  Description: Writes values to fields 1,2,3,4 and status in a single ThingSpeak update every 20 seconds.
+  Description: Writes a value to a channel on ThingSpeak every 20 seconds.
   
-  Hardware: Arduino WiFi Shield 101
+  Hardware: ESP8266 based boards
   
   !!! IMPORTANT - Modify the secrets.h file for this project with your network connection and ThingSpeak channel details. !!!
   
   Note:
-  - Requires WiFi101 library. Use the WiFi101 library version 0.13.0 or older. WiFi101 library versions 0.14.0 and newer have a bug
-    that stops this ThingSpeak library from working properly.
-  - Make sure the WiFi 101 Shield has updated firmware. Find instructions here: https://www.arduino.cc/en/Tutorial/FirmwareUpdater
+  - Requires ESP8266WiFi library and ESP8622 board add-on. See https://github.com/esp8266/Arduino for details.
+  - Select the target hardware from the Tools->Board menu
   - This example is written for a network using WPA encryption. For WEP or WPA, change the WiFi.begin() call accordingly.
   
   ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize, and 
@@ -25,8 +24,8 @@
 */
 
 #include "ThingSpeak.h"
-#include <WiFi101.h>
 #include "secrets.h"
+#include <ESP8266WiFi.h>
 
 char ssid[] = SECRET_SSID;   // your network SSID (name) 
 char pass[] = SECRET_PASS;   // your network password
@@ -36,20 +35,12 @@ WiFiClient  client;
 unsigned long myChannelNumber = SECRET_CH_ID;
 const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
 
-// Initialize our values
-int number1 = 0;
-int number2 = random(0,100);
-int number3 = random(0,100);
-int number4 = random(0,100);
-String myStatus = "";
+int number = 0;
 
 void setup() {
-  //Initialize serial and wait for port to open:
-  Serial.begin(115200);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo native USB port only
-  }
-    
+  Serial.begin(115200);  // Initialize serial
+
+  WiFi.mode(WIFI_STA); 
   ThingSpeak.begin(client);  // Initialize ThingSpeak
 }
 
@@ -66,44 +57,22 @@ void loop() {
     } 
     Serial.println("\nConnected.");
   }
-
-  // set the fields with the values
-  ThingSpeak.setField(1, number1);
-  ThingSpeak.setField(2, number2);
-  ThingSpeak.setField(3, number3);
-  ThingSpeak.setField(4, number4);
-
-  // figure out the status message
-  if(number1 > number2){
-    myStatus = String("field1 is greater than field2"); 
-  }
-  else if(number1 < number2){
-    myStatus = String("field1 is less than field2");
-  }
-  else{
-    myStatus = String("field1 equals field2");
-  }
   
-  // set the status
-  ThingSpeak.setStatus(myStatus);
-  
-  // write to the ThingSpeak channel
-  int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
+  // Write to ThingSpeak. There are up to 8 fields in a channel, allowing you to store up to 8 different
+  // pieces of information in a channel.  Here, we write to field 1.
+  int x = ThingSpeak.writeField(myChannelNumber, 1, number, myWriteAPIKey);
   if(x == 200){
     Serial.println("Channel update successful.");
   }
   else{
     Serial.println("Problem updating channel. HTTP error code " + String(x));
   }
-  
-  // change the values
-  number1++;
-  if(number1 > 99){
-    number1 = 0;
+
+  // change the value
+  number++;
+  if(number > 99){
+    number = 0;
   }
-  number2 = random(0,100);
-  number3 = random(0,100);
-  number4 = random(0,100);
   
   delay(20000); // Wait 20 seconds to update the channel again
 }

@@ -5,14 +5,13 @@
                The value read from the public channel is the current outside temperature at MathWorks headquaters in Natick, MA.  The value from the
                private channel is an example counter that increments every 10 seconds.
   
-  Hardware: Arduino Yún, Yún Rev.2
+  Hardware: Arduino Uno WiFi Rev2
   
   !!! IMPORTANT - Modify the secrets.h file for this project with your network connection and ThingSpeak channel details. !!!
-
-  Notes:
-    - This example works with both Ethernet and WiFi
-    - For WiFi with the Yún Rev.2, configure the SSID and password through the Access Point portal.
-      See https://www.arduino.cc/en/Guide/ArduinoYunRev2 for details.
+  
+  Note:
+  - Requires WiFiNINA library.
+  - This example is written for a network using WPA encryption. For WEP or WPA, change the WiFi.begin() call accordingly.
   
   ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize, and 
   analyze live data streams in the cloud. Visit https://www.thingspeak.com to sign up for a free account and create a channel.  
@@ -22,14 +21,17 @@
   
   For licensing information, see the accompanying license file.
   
-  Copyright 2018, The MathWorks, Inc.
+  Copyright 2019, The MathWorks, Inc.
 */
 
 #include "ThingSpeak.h"
+#include <WiFiNINA.h>
 #include "secrets.h"
-#include <BridgeClient.h>
 
-BridgeClient client;
+char ssid[] = SECRET_SSID;   // your network SSID (name) 
+char pass[] = SECRET_PASS;   // your network password
+int keyIndex = 0;            // your network key Index number (needed only for WEP)
+WiFiClient  client;
 
 // Weather station channel details
 unsigned long weatherStationChannelNumber = SECRET_CH_ID_WEATHER_STATION;
@@ -41,16 +43,39 @@ const char * myCounterReadAPIKey = SECRET_READ_APIKEY_COUNTER;
 unsigned int counterFieldNumber = 1; 
 
 void setup() {
-  Serial.begin(115200);  //Initialize serial
+  Serial.begin(115200);  // Initialize serial
 
-  Bridge.begin();
-  ThingSpeak.begin(client);  // Initialize ThingSpeak
+  // check for the WiFi module:
+  if (WiFi.status() == WL_NO_MODULE) {
+    Serial.println("Communication with WiFi module failed!");
+    // don't continue
+    while (true);
+  }
+
+  String fv = WiFi.firmwareVersion();
+  if (fv != "1.0.0") {
+    Serial.println("Please upgrade the firmware");
+  }
+    
+  ThingSpeak.begin(client);  //Initialize ThingSpeak
 }
 
 void loop() {
 
   int statusCode = 0;
   
+  // Connect or reconnect to WiFi
+  if(WiFi.status() != WL_CONNECTED){
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(SECRET_SSID);
+    while(WiFi.status() != WL_CONNECTED){
+      WiFi.begin(ssid, pass); // Connect to WPA/WPA2 network. Change this line if using open or WEP network
+      Serial.print(".");
+      delay(5000);     
+    } 
+    Serial.println("\nConnected");
+  }
+
   // Read in field 4 of the public channel recording the temperature
   float temperatureInF = ThingSpeak.readFloatField(weatherStationChannelNumber, temperatureFieldNumber);  
 
@@ -74,8 +99,7 @@ void loop() {
     Serial.println("Counter: " + String(count));
   }
   else{
-    Serial.print("Problem reading channel. HTTP error code ");
-    Serial.println(statusCode); 
+    Serial.println("Problem reading channel. HTTP error code " + String(statusCode)); 
   }
   
   delay(15000); // No need to read the counter too often.

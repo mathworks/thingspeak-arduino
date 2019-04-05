@@ -23,7 +23,6 @@
 */
 
 #include "ThingSpeak.h"
-#include <SPI.h>
 #include <WiFiNINA.h>
 #include "secrets.h"
 

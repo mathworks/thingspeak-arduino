@@ -5,14 +5,13 @@
                The value read from the public channel is the current outside temperature at MathWorks headquaters in Natick, MA.  The value from the
                private channel is an example counter that increments every 10 seconds.
   
-  Hardware: Arduino WiFi Shield 101
+  Hardware: ESP8266 based boards
   
   !!! IMPORTANT - Modify the secrets.h file for this project with your network connection and ThingSpeak channel details. !!!
   
   Note:
-  - Requires WiFi101 library. Use the WiFi101 library version 0.13.0 or older. WiFi101 library versions 0.14.0 and newer have a bug
-    that stops this ThingSpeak library from working properly.
-  - Make sure the WiFi 101 Shield has updated firmware. Find instructions here: https://www.arduino.cc/en/Tutorial/FirmwareUpdater
+  - Requires ESP8266WiFi library and ESP8622 board add-on. See https://github.com/esp8266/Arduino for details.
+  - Select the target hardware from the Tools->Board menu
   - This example is written for a network using WPA encryption. For WEP or WPA, change the WiFi.begin() call accordingly.
   
   ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize, and 
@@ -27,8 +26,8 @@
 */
 
 #include "ThingSpeak.h"
-#include <WiFi101.h>
 #include "secrets.h"
+#include <ESP8266WiFi.h>
 
 char ssid[] = SECRET_SSID;   // your network SSID (name) 
 char pass[] = SECRET_PASS;   // your network password
@@ -45,12 +44,9 @@ const char * myCounterReadAPIKey = SECRET_READ_APIKEY_COUNTER;
 unsigned int counterFieldNumber = 1; 
 
 void setup() {
-  //Initialize serial and wait for port to open:
-  Serial.begin(115200);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo native USB port only
-  }
-    
+  Serial.begin(115200);  // Initialize serial
+
+  WiFi.mode(WIFI_STA); 
   ThingSpeak.begin(client);  // Initialize ThingSpeak
 }
 
