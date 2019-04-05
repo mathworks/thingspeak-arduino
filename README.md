@@ -26,15 +26,17 @@ In the Arduino IDE, choose Sketch/Include Library/Manage Libraries.  Click the T
 ## Compatible Hardware:
 
 * Arduino/Genuino or compatible using a WiFi Shield
-* Arduino/Genuino or compatible using a WiFi Shield 101 
+* Arduino/Genuino or compatible using a WiFi Shield 101 (Use the WiFi101 library version 0.13.0 or older.)
 * Arduino/Genuino or compatible using an Ethernet Shield
 * Arduino/Genuino or compatible using a MKR ETH Shield
-* Arduino MKR1000 (use the WiFi101 library version 0.13.0 or older. WiFi101 library versions 0.14.0 and newer have a bug that stops this ThingSpeak library from working properly)
+* Arduino MKR1000 
 * Arduino MKR1010
 * Arduino VIDOR 4000
 * Arduino GSM 14000
+* Arduino Uno WiFi Rev2
 * Arduino Yún (Rev1 and Rev2)
-* ESP8266 (tested with SparkFun ESP8266 Thing - Dev Board and NodeMCU 1.0 module) 
+* ESP8266 programming directly (tested with SparkFun ESP8266 Thing - Dev Board and NodeMCU 1.0 module)
+* ESP8266 via AT commands 
 * ESP32 (tested with SparkFun ESP32 Thing)
 
 # Examples
