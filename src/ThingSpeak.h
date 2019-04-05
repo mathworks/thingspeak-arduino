@@ -18,8 +18,7 @@
 #ifndef ThingSpeak_h
 #define ThingSpeak_h
 
-#define TS_VER "1.5"
-
+#define TS_VER "1.5.0"
 
 #include "Arduino.h"
 #include <Client.h>
@@ -276,7 +275,10 @@ class ThingSpeakClass
 		#ifdef PRINT_DEBUG_MESSAGES
 			Serial.print("ts::writeField (channelNumber: "); Serial.print(channelNumber); Serial.print(" writeAPIKey: "); Serial.print(writeAPIKey); Serial.print(" field: "); Serial.print(field); Serial.print(" value: \""); Serial.print(value); Serial.println("\")");
 		#endif
-		String postMessage = String("field") + String(field) + "=" + value;
+		String postMessage = String("field");
+		postMessage.concat(field);
+		postMessage.concat("=");
+		postMessage.concat(value);
 		return writeRaw(channelNumber, postMessage, writeAPIKey);
  	};
 
@@ -724,110 +726,118 @@ class ThingSpeakClass
 	*/
 	int writeFields(unsigned long channelNumber, const char * writeAPIKey)
 	{
-		String postMessage = String("");
-		bool fFirstItem = true;
-		for(size_t iField = 0; iField < 8; iField++)
-		{
-			if(this->nextWriteField[iField].length() > 0)
-			{
-				if(!fFirstItem)
-				{
-					postMessage = postMessage + String("&");
-				}
-				postMessage = postMessage + String("field") + String(iField + 1) + String("=") + this->nextWriteField[iField];
-				fFirstItem = false;
-				this->nextWriteField[iField] = "";
-			}
-		}
-
-		if(!isnan(nextWriteLatitude))
-		{
-			if(!fFirstItem)
-			{
-				postMessage = postMessage + String("&");
-			}
-			postMessage = postMessage + String("lat=") + String(this->nextWriteLatitude);
-			fFirstItem = false;
-			this->nextWriteLatitude = NAN;
-		}
-
-		if(!isnan(this->nextWriteLongitude))
-		{
-			if(!fFirstItem)
-			{
-				postMessage = postMessage + String("&");
-			}
-			postMessage = postMessage + String("long=") + String(this->nextWriteLongitude);
-			fFirstItem = false;
-			this->nextWriteLongitude = NAN;
-		}
-
-
-		if(!isnan(this->nextWriteElevation))
-		{
-			if(!fFirstItem)
-			{
-				postMessage = postMessage + String("&");
-			}
-			postMessage = postMessage + String("elevation=") + String(this->nextWriteElevation);
-			fFirstItem = false;
-			this->nextWriteElevation = NAN;
+		if(!connectThingSpeak()){
+			// Failed to connect to ThingSpeak
+			return ERR_CONNECT_FAILED;
 		}
 		
-		if(this->nextWriteStatus.length() > 0)
-		{
-			if(!fFirstItem)
-			{
-				postMessage = postMessage + String("&");
-			}
-			postMessage = postMessage + String("status=") + String(this->nextWriteStatus);
-			fFirstItem = false;
-			this->nextWriteStatus = "";
-		}
+		// Get the content length of the payload
+		int contentLen = getWriteFieldsContentLength();		
 		
-		if(this->nextWriteTwitter.length() > 0)
-		{
-			if(!fFirstItem)
-			{
-				postMessage = postMessage + String("&");
-			}
-			postMessage = postMessage + String("twitter=") + String(this->nextWriteTwitter);
-			fFirstItem = false;
-			this->nextWriteTwitter = "";
-		}
-		
-		if(this->nextWriteTweet.length() > 0)
-		{
-			if(!fFirstItem)
-			{
-				postMessage = postMessage + String("&");
-			}
-			postMessage = postMessage + String("tweet=") + String(this->nextWriteTweet);
-			fFirstItem = false;
-			this->nextWriteTweet = "";
-		}
-		
-		if(this->nextWriteCreatedAt.length() > 0)
-		{
-			if(!fFirstItem)
-			{
-				postMessage = postMessage + String("&");
-			}
-			postMessage = postMessage + String("created_at=") + String(this->nextWriteCreatedAt);
-			fFirstItem = false;
-			this->nextWriteCreatedAt = "";
-		}
-		
-		
-		if(fFirstItem)
-		{
+		if(contentLen == 0){
 			// setField was not called before writeFields
 			return ERR_SETFIELD_NOT_CALLED;
 		}
+		
+		#ifdef PRINT_DEBUG_MESSAGES
+			Serial.print("ts::writeFields   (channelNumber: "); Serial.print(channelNumber); Serial.print(" writeAPIKey: "); Serial.println(writeAPIKey);
+		#endif
+		
+		// Post data to thingspeak
+		if(!this->client->print("POST /update HTTP/1.1\r\n")) return abortWriteRaw();
+		if(!writeHTTPHeader(writeAPIKey)) return abortWriteRaw();
+		if(!this->client->print("Content-Type: application/x-www-form-urlencoded\r\n")) return abortWriteRaw();
+		if(!this->client->print("Content-Length: ")) return abortWriteRaw();
+		if(!this->client->print(contentLen)) return abortWriteRaw();
+		if(!this->client->print("\r\n\r\n")) return abortWriteRaw();
+			
+		bool fFirstItem = true;
+		for(size_t iField = 0; iField < FIELDNUM_MAX; iField++){
+			if(this->nextWriteField[iField].length() > 0){
+				if(!fFirstItem){
+					if(!this->client->print("&")) return abortWriteRaw();
+				}
+				if(!this->client->print("field")) return abortWriteRaw();
+				if(!this->client->print(iField + 1)) return abortWriteRaw();
+				if(!this->client->print("=")) return abortWriteRaw();
+				if(!this->client->print(this->nextWriteField[iField])) return abortWriteRaw();
+				fFirstItem = false;
+			}
+		}
+		
+		if(!isnan(this->nextWriteLatitude)){
+			if(!fFirstItem){
+				if(!this->client->print("&")) return abortWriteRaw();
+			}
+			if(!this->client->print("lat=")) return abortWriteRaw();
+			if(!this->client->print(this->nextWriteLatitude)) return abortWriteRaw();
+			fFirstItem = false;
+		}
 
-		return writeRaw(channelNumber, postMessage, writeAPIKey);
-	};
+		if(!isnan(this->nextWriteLongitude)){
+			if(!fFirstItem){
+				if(!this->client->print("&")) return abortWriteRaw();
+			}
+			if(!this->client->print("long=")) return abortWriteRaw();
+			if(!this->client->print(this->nextWriteLongitude)) return abortWriteRaw();
+			fFirstItem = false;
+		}
 
+
+		if(!isnan(this->nextWriteElevation)){
+			if(!fFirstItem){
+				if(!this->client->print("&")) return abortWriteRaw();
+			}
+			if(!this->client->print("elevation=")) return abortWriteRaw();
+			if(!this->client->print(this->nextWriteElevation)) return abortWriteRaw();
+			fFirstItem = false;
+		}
+		
+		if(this->nextWriteStatus.length() > 0){
+			if(!fFirstItem){
+				if(!this->client->print("&")) return abortWriteRaw();
+			}
+			if(!this->client->print("status=")) return abortWriteRaw();
+			if(!this->client->print(this->nextWriteStatus)) return abortWriteRaw();
+			fFirstItem = false;
+		}
+		
+		if(this->nextWriteTwitter.length() > 0){
+			if(!fFirstItem){
+				if(!this->client->print("&")) return abortWriteRaw();
+			}
+			if(!this->client->print("twitter=")) return abortWriteRaw();
+			if(!this->client->print(this->nextWriteTwitter)) return abortWriteRaw();
+			fFirstItem = false;
+		}
+		
+		if(this->nextWriteTweet.length() > 0){
+			if(!fFirstItem){
+				if(!this->client->print("&")) return abortWriteRaw();
+			}
+			if(!this->client->print("tweet=")) return abortWriteRaw();
+			if(!this->client->print(this->nextWriteTweet)) return abortWriteRaw();
+			fFirstItem = false;
+		}
+		
+		if(this->nextWriteCreatedAt.length() > 0){
+			if(!fFirstItem){
+				if(!this->client->print("&")) return abortWriteRaw();
+			}
+			if(!this->client->print("created_at=")) return abortWriteRaw();
+			if(!this->client->print(this->nextWriteCreatedAt)) return abortWriteRaw();
+			fFirstItem = false;
+		}
+
+		
+		if(!this->client->print("&headers=false")) return abortWriteRaw();
+		
+		resetWriteFields();
+		
+		return finishWrite();
+		
+	}
+	
 	 
 	/*
 	Function: writeRaw
@@ -892,7 +902,7 @@ class ThingSpeakClass
 	int writeRaw(unsigned long channelNumber, String postMessage, const char * writeAPIKey)
 	{
 		#ifdef PRINT_DEBUG_MESSAGES
-			Serial.print("ts::writeRaw   (channelNumber: "); Serial.print(channelNumber); Serial.print(" writeAPIKey: "); Serial.print(writeAPIKey); Serial.print(" postMessage: \""); Serial.print(postMessage); Serial.println("\")");
+			Serial.print("ts::writeRaw   (channelNumber: "); Serial.print(channelNumber); Serial.print(" writeAPIKey: "); Serial.println(writeAPIKey);
 		#endif
 
 		if(!connectThingSpeak())
@@ -901,8 +911,8 @@ class ThingSpeakClass
 			return ERR_CONNECT_FAILED;
 		}
 
-		postMessage = postMessage + String("&headers=false");
-
+		postMessage.concat("&headers=false");
+		
 		#ifdef PRINT_DEBUG_MESSAGES
 			Serial.print("               POST \"");Serial.print(postMessage);Serial.println("\"");
 		#endif
@@ -916,31 +926,11 @@ class ThingSpeakClass
 		if(!this->client->print(postMessage.length())) return abortWriteRaw();
 		if(!this->client->print("\r\n\r\n")) return abortWriteRaw();
 		if(!this->client->print(postMessage)) return abortWriteRaw();
-  
-		String entryIDText = String();
-		int status = getHTTPResponse(entryIDText);
-		if(status != OK_SUCCESS)
-		{
-			client->stop();
-			return status;
-		}
-		long entryID = entryIDText.toInt();
-
-		#ifdef PRINT_DEBUG_MESSAGES
-		Serial.print("               Entry ID \"");Serial.print(entryIDText);Serial.print("\" (");Serial.print(entryID);Serial.println(")");
-		#endif
-
-		client->stop();
 		
-		#ifdef PRINT_DEBUG_MESSAGES
-			Serial.println("disconnected.");
-		#endif
-		if(entryID == 0)
-		{
-			// ThingSpeak did not accept the write
-			status = ERR_NOT_INSERTED;
-		}
-		return status;
+		resetWriteFields();
+		
+		return finishWrite();
+		
 	};
 	
 	 
@@ -974,7 +964,10 @@ class ThingSpeakClass
 			}
 			Serial.print(" field: "); Serial.print(field); Serial.println(")");
 		#endif
-		return readRaw(channelNumber, String(String("/fields/") + String(field) + String("/last")), readAPIKey);
+		String urlSuffix = String("/fields/");
+		urlSuffix.concat(field);
+		urlSuffix.concat("/last");
+		return readRaw(channelNumber, urlSuffix, readAPIKey);
 	}
 
 
@@ -1271,8 +1264,10 @@ class ThingSpeakClass
 			return String("");
 		}
 
-		String URL = String("/channels/") + String(channelNumber) + URLSuffix;
-
+		String URL = String("/channels/");
+		URL.concat(channelNumber);
+		URL.concat(URLSuffix);
+		
 		#ifdef PRINT_DEBUG_MESSAGES
 			Serial.print("               GET \"");Serial.print(URL);Serial.println("\"");
 		#endif
@@ -1289,15 +1284,16 @@ class ThingSpeakClass
 			
 		this->lastReadStatus = status;
 
-
+		emptyStream();
+		
 		#ifdef PRINT_DEBUG_MESSAGES
 			if(status == OK_SUCCESS)
 			{
 				Serial.print("Read: \""); Serial.print(content); Serial.println("\"");
 			}
 		#endif
-
-		client->stop();
+				
+		this->client->stop();
 		#ifdef PRINT_DEBUG_MESSAGES
 			Serial.println("disconnected.");
 		#endif
@@ -1308,8 +1304,7 @@ class ThingSpeakClass
 			return String("");
 		}
 
-        // This is a workaround to a bug in the Spark implementation of String
-    	return String("") + content;
+    	return content;
 	};
 	
  
@@ -1341,6 +1336,100 @@ class ThingSpeakClass
 		return this->lastReadStatus;
 	};
 private:
+		
+	int getWriteFieldsContentLength(){
+		size_t iField;
+		int contentLen = 0;
+		
+		for(iField = 0; iField < FIELDNUM_MAX; iField++){
+			if(this->nextWriteField[iField].length() > 0){
+				contentLen = contentLen + 8 + this->nextWriteField[iField].length();	// &fieldX=[value]
+				
+				// future-proof in case ThingSpeak allows 999 fields someday
+				if(iField > 9){
+					contentLen = contentLen + 1;
+				}
+				else if(iField > 99){
+					contentLen = contentLen + 2;
+				}
+				
+			}
+		}
+		
+		if(!isnan(this->nextWriteLatitude)){
+			contentLen = contentLen + 5 + String(this->nextWriteLatitude).length(); // &lat=[value]
+		}
+		
+		if(!isnan(this->nextWriteLongitude)){
+			contentLen = contentLen + 6 + String(this->nextWriteLongitude).length(); // &long=[value]
+		}
+		
+		if(!isnan(this->nextWriteElevation)){
+			contentLen = contentLen + 11 + String(this->nextWriteElevation).length(); // &elevation=[value]
+		}
+		
+		if(this->nextWriteStatus.length() > 0){
+			contentLen = contentLen + 8 + this->nextWriteStatus.length();	// &status=[value]
+		}
+		
+		if(this->nextWriteTwitter.length() > 0){
+			contentLen = contentLen + 9 + this->nextWriteTwitter.length();	// &twitter=[value]
+		}
+		
+		if(this->nextWriteTweet.length() > 0){
+			contentLen = contentLen + 7 + this->nextWriteTweet.length();	// &tweet=[value]
+		}		
+		
+		if(this->nextWriteCreatedAt.length() > 0){
+			contentLen = contentLen + 12 + this->nextWriteCreatedAt.length();	// &created_at=[value]
+		}
+		
+		if(contentLen == 0){
+			return 0;
+		}
+		
+		contentLen = contentLen + 13; // add 14 for '&headers=false', subtract 1 for missing first '&'  
+		
+		return contentLen;
+		
+	}
+	
+	void emptyStream(){
+		while(this->client->available() > 0){
+			this->client->read();
+		}
+	}
+	
+	int finishWrite(){
+		String entryIDText = String();
+		int status = getHTTPResponse(entryIDText);
+		
+		emptyStream();
+		
+		if(status != OK_SUCCESS)
+		{
+			this->client->stop();
+			return status;
+		}
+		long entryID = entryIDText.toInt();
+
+		#ifdef PRINT_DEBUG_MESSAGES
+		Serial.print("               Entry ID \"");Serial.print(entryIDText);Serial.print("\" (");Serial.print(entryID);Serial.println(")");
+		#endif
+		
+		this->client->stop();
+		
+		#ifdef PRINT_DEBUG_MESSAGES
+			Serial.println("disconnected.");
+		#endif
+		if(entryID == 0)
+		{
+			// ThingSpeak did not accept the write
+			status = ERR_NOT_INSERTED;
+		}
+		return status;
+	}
+	
 	
 	String getJSONValueByKey(String textToSearch, String key)
 	{	
@@ -1348,7 +1437,9 @@ private:
 			return String("");
 		} 
 		
-		String searchPhrase = String("\"") + key + String("\":\"");
+		String searchPhrase = String("\"");
+		searchPhrase.concat(key);
+		searchPhrase.concat("\":\"");
 		
 		int fromPosition = textToSearch.indexOf(searchPhrase,0);
 		
@@ -1374,12 +1465,19 @@ private:
 	
     int abortWriteRaw()
     {
-        this->client->stop();
+        while(this->client->available() > 0){
+			this->client->read();
+		}
+		this->client->stop();
+		resetWriteFields();
         return ERR_UNEXPECTED_FAIL;
     }
 
     String abortReadRaw()
     {
+		while(this->client->available() > 0){
+			this->client->read();
+		}
 		this->client->stop();
 		#ifdef PRINT_DEBUG_MESSAGES
 			Serial.println("ReadRaw abort - disconnected.");
@@ -1419,7 +1517,8 @@ private:
 			Serial.print(this->port);
 			Serial.print("...");
 		#endif
-		connectSuccess = client->connect(THINGSPEAK_URL, this->port);
+				
+		connectSuccess = client->connect(const_cast<char *>(THINGSPEAK_URL), this->port);
             
 
 		#ifdef PRINT_DEBUG_MESSAGES
@@ -1439,7 +1538,6 @@ private:
 	{
  
 		if (!this->client->print("Host: api.thingspeak.com\r\n")) return false;
-		if (!this->client->print("Connection: close\r\n")) return false;
 		if (!this->client->print("User-Agent: ")) return false;
 		if (!this->client->print(TS_USER_AGENT)) return false;
 		if (!this->client->print("\r\n")) return false;
@@ -1454,24 +1552,27 @@ private:
 
 	int getHTTPResponse(String & response)
 	{
-        long startWaitForResponseAt = millis();
-        while(client->available() == 0 && millis() - startWaitForResponseAt < TIMEOUT_MS_SERVERRESPONSE)
-        {
-            delay(100);
-        }
-        if(client->available() == 0)
-        {
-			return ERR_TIMEOUT; // Didn't get server response in time
-        }
 
-		if(!client->find(const_cast<char *>("HTTP/1.1")))
+		// make sure all of the HTTP request is pushed out of the buffer before looking for a response
+		this->client->flush();
+		
+		long timeoutTime = millis() + TIMEOUT_MS_SERVERRESPONSE;
+		
+		while(this->client-> available() < 17){
+			delay(2);
+			if(millis() > timeoutTime){
+				return ERR_TIMEOUT;
+			}
+		}
+		
+		if(!this->client->find(const_cast<char *>("HTTP/1.1")))
 		{
 			#ifdef PRINT_HTTP
 				Serial.println("ERROR: Didn't find HTTP/1.1");
     		#endif
 			return ERR_BAD_RESPONSE; // Couldn't parse response (didn't find HTTP/1.1)
 		}
-		int status = client->parseInt();
+		int status = this->client->parseInt();
 		#ifdef PRINT_HTTP
 			Serial.print("Got Status of ");Serial.println(status);
 		#endif
@@ -1480,36 +1581,56 @@ private:
 			return status;
 		}
 
-		if(!client->find(const_cast<char *>("\r\n")))
-		{
+		// Find Content-Length
+		if(!this->client->find(const_cast<char *>("Content-Length:"))){
 			#ifdef PRINT_HTTP
-    			Serial.println("ERROR: Didn't find end of status line");
-			#endif
-			return ERR_BAD_RESPONSE;
+			Serial.println("ERROR: Didn't find Content-Length header");
+    		#endif
+			return ERR_BAD_RESPONSE; // Couldn't parse response (didn't find HTTP/1.1)
 		}
+		int contentLength = this->client->parseInt();
+		
 		#ifdef PRINT_HTTP
-    		Serial.println("Found end of status line");
-		#endif
-
-		if(!client->find(const_cast<char *>("\n\r\n")))
+			Serial.print("Content Length: ");
+			Serial.println(contentLength);
+    	#endif
+		
+		if(!this->client->find(const_cast<char *>("\r\n\r\n")))
 		{
 			#ifdef PRINT_HTTP
-				Serial.println("ERROR: Didn't find end of header");
+				Serial.println("ERROR: Didn't find end of headers");
 			#endif
 			return ERR_BAD_RESPONSE;
 		}
 		#ifdef PRINT_HTTP
 			Serial.println("Found end of header");
 		#endif
-
-		String tempString = client->readString();
+		
+		timeoutTime = millis() + TIMEOUT_MS_SERVERRESPONSE;
+		
+		while(this->client->available() < contentLength){
+			delay(2);
+			if(millis() > timeoutTime){
+				return ERR_TIMEOUT;
+			}
+		}
+		
+		String tempString = String("");
+		char y = 0;
+		for(int i = 0; i < contentLength; i++){
+			y = client->read();
+			tempString.concat(y);
+		}
 		response = tempString;
+		
+		
 		#ifdef PRINT_HTTP
     		Serial.print("Response: \"");Serial.print(response);Serial.println("\"");
 		#endif
 		return status;
 	};
-
+	
+	
 	int convertFloatToChar(float value, char *valueString)
 	{
 		// Supported range is -999999000000 to 999999000000
@@ -1542,7 +1663,7 @@ private:
 
 	void resetWriteFields()
 	{
-		for(size_t iField = 0; iField < 8; iField++)
+		for(size_t iField = 0; iField < FIELDNUM_MAX; iField++)
 		{
 			this->nextWriteField[iField] = "";
 		}
