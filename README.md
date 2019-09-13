@@ -2,7 +2,7 @@
 
 This library enables an Arduino or other compatible hardware to write or read data to or from ThingSpeak, an open data platform for the Internet of Things with MATLAB analytics and visualization.
 
-Hardware specific <a href="http://github.com/mathworks/thingspeak-arduino/tree/master/examples">examples</a> are found here. But to give you an idea of usage examples for <a href="#typical_write">writing</a> and <a href="#typical_read">reading</a> with an ESP8266 are shown below. Complete <a href="#documentation">documentation</a> in aslo shown below.
+Hardware specific <a href="http://github.com/mathworks/thingspeak-arduino/tree/master/examples">examples</a> are found here. But to give you an idea of usage examples for <a href="#typical_write">writing</a> and <a href="#typical_read">reading</a> with an ESP8266 are shown below. Complete <a href="#documentation">documentation</a> in also shown below.
 
 ThingSpeak offers free data storage and analysis of time-stamped numeric or alphanumeric data. Users can access ThingSpeak by visiting http://thingspeak.com and creating a ThingSpeak user account.
 
