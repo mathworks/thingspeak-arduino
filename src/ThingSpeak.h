@@ -1560,7 +1560,7 @@ private:
 		
 		while(this->client-> available() < 17){
 			delay(2);
-			if(millis() > timeoutTime){
+			if(millis() > (unsigned long)timeoutTime){
 				return ERR_TIMEOUT;
 			}
 		}
@@ -1610,7 +1610,7 @@ private:
 		
 		while(this->client->available() < contentLength){
 			delay(2);
-			if(millis() > timeoutTime){
+			if(millis() > (unsigned long)timeoutTime){
 				return ERR_TIMEOUT;
 			}
 		}
