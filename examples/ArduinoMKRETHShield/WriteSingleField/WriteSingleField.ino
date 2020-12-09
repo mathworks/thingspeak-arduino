@@ -18,12 +18,12 @@
   
   For licensing information, see the accompanying license file.
   
-  Copyright 2018, The MathWorks, Inc.
+  Copyright 2020, The MathWorks, Inc.
 */
 
-#include "ThingSpeak.h"
 #include <Ethernet.h>
 #include "secrets.h"
+#include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
 
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x10, 0x40, 0x4F };
 
@@ -41,7 +41,10 @@ int number = 0;
 void setup() {
   Ethernet.init(5);   // MKR ETH shield
   Serial.begin(115200);  //Initialize serial
-    
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for Leonardo native USB port only
+  }
+      
   // start the Ethernet connection:
   Serial.println("Initialize Ethernet with DHCP:");
   if (Ethernet.begin(mac) == 0) {

@@ -27,7 +27,6 @@
 #endif
 
 #include <ArduinoUnit.h>
-#include <ThingSpeak.h>
 
 #if defined(ARDUINO_AVR_YUN)
     #include "YunClient.h"
@@ -50,6 +49,8 @@
   #endif
 #endif
 
+#include <ThingSpeak.h> // always include thingspeak header file after other header files and custom macros
+
 unsigned long testPublicChannelNumber = 209617;
 const char * testPublicChannelWriteAPIKey = "514SX5OBP2OFEPL2";
 
@@ -63,13 +64,13 @@ test(readPrivateFieldCase)
 {
   // Test basic value read -- should give anything but 0
   assertNotEqual(0.0,ThingSpeak.readFloatField(testPrivateChannelNumber, 1, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
 
   // Test read with invalid API key
   // * Using the wrong API key causes a connection failure on the next attempt to connect to ThingSpeak
   // * The cause is unknown, disable this test for now
   //assertEqual(0.0,ThingSpeak.readFloatField(testPrivateChannelNumber, 1, "AFAKEAPIKEYFAKEX"));
-  //assertEqual(ERR_BADAPIKEY,ThingSpeak.getLastReadStatus()); 
+  //assertEqual(TS_ERR_BADAPIKEY,ThingSpeak.getLastReadStatus()); 
 }
 
 
@@ -78,31 +79,31 @@ test(readPublicFieldCase)
 { 
 
   delay(WRITE_DELAY_FOR_THINGSPEAK);
-  assertEqual(OK_SUCCESS, ThingSpeak.writeField(testPublicChannelNumber, 4, (float)1.0, testPublicChannelWriteAPIKey));
+  assertEqual(TS_OK_SUCCESS, ThingSpeak.writeField(testPublicChannelNumber, 4, (float)1.0, testPublicChannelWriteAPIKey));
   
   // Test basic value read -- should give anything but 0
   assertNotEqual(0.0,ThingSpeak.readFloatField(testPublicChannelNumber, 4));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
 
   // Test read of field out of range
   assertEqual(0.0,ThingSpeak.readFloatField(testPublicChannelNumber, 0));
-  assertEqual(ERR_INVALID_FIELD_NUM,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_ERR_INVALID_FIELD_NUM,ThingSpeak.getLastReadStatus());
   assertEqual(0.0,ThingSpeak.readFloatField(testPublicChannelNumber, 9));
-  assertEqual(ERR_INVALID_FIELD_NUM,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_ERR_INVALID_FIELD_NUM,ThingSpeak.getLastReadStatus());
   
   #if defined(USE_WIFI101_SHIELD)
-    #define ERR_BAD ERR_CONNECT_FAILED
+    #define TS_ERR_BAD TS_ERR_CONNECT_FAILED
   #else
-    #define ERR_BAD ERR_BADURL  
+    #define TS_ERR_BAD TS_ERR_BADURL  
   #endif
 
   // Test read of invalid channel #
   // * Using the wrong API key causes a connection failure on the next attempt to connect to ThingSpeak
   // * The cause is unknown, disable this test for now
   //assertEqual(0.0,ThingSpeak.readFloatField(0, 1));
-  //assertEqual(ERR_BADURL,ThingSpeak.getLastReadStatus());
+  //assertEqual(TS_ERR_BADURL,ThingSpeak.getLastReadStatus());
   //assertEqual(0.0,ThingSpeak.readFloatField(4294967295L, 1));
-  //assertEqual(ERR_BAD,ThingSpeak.getLastReadStatus());  
+  //assertEqual(TS_ERR_BAD,ThingSpeak.getLastReadStatus());  
 }
 
 
@@ -111,31 +112,31 @@ test(ReadFloatFieldCase)
   // Always to ensure that rate limit isn't hit
   delay(WRITE_DELAY_FOR_THINGSPEAK);
   
-  assertEqual(OK_SUCCESS,ThingSpeak.setField(1,(float)3.14159));  // float
-  assertEqual(OK_SUCCESS,ThingSpeak.setField(2,-47)); // integer
-  assertEqual(OK_SUCCESS,ThingSpeak.setField(3,(long)100000L)); // long
-  assertEqual(OK_SUCCESS,ThingSpeak.setField(4,(float)NAN)); // Nan
-  assertEqual(OK_SUCCESS,ThingSpeak.setField(5,"foobar")); // string
-  assertEqual(OK_SUCCESS,ThingSpeak.setField(6,(float)INFINITY)); // + inf
-  assertEqual(OK_SUCCESS,ThingSpeak.setField(7,(float)-INFINITY)); // + inf
-  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.setField(1,(float)3.14159));  // float
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.setField(2,-47)); // integer
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.setField(3,(long)100000L)); // long
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.setField(4,(float)NAN)); // Nan
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.setField(5,"foobar")); // string
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.setField(6,(float)INFINITY)); // + inf
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.setField(7,(float)-INFINITY)); // + inf
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
 
   // Test read as float
   assertLess(abs((float)3.14159 - ThingSpeak.readFloatField(testPrivateChannelNumber, 1, testPrivateChannelReadAPIKey)),float(0.001));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertEqual(-47.0,ThingSpeak.readFloatField(testPrivateChannelNumber, 2, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertEqual(100000.0,ThingSpeak.readFloatField(testPrivateChannelNumber, 3, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertTrue(isnan(ThingSpeak.readFloatField(testPrivateChannelNumber, 4, testPrivateChannelReadAPIKey)));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertEqual(0.0,ThingSpeak.readFloatField(testPrivateChannelNumber, 5, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertEqual(1,isinf(ThingSpeak.readFloatField(testPrivateChannelNumber, 6, testPrivateChannelReadAPIKey)));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // AVR compiler doesn't correctly test for negative infinite (http://www.atmel.com/webdoc/AVRLibcReferenceManual/group__avr__math_1ga18a7409e0b2341afaa41993960961772.html)
   assertEqual(1,isinf(ThingSpeak.readFloatField(testPrivateChannelNumber, 7, testPrivateChannelReadAPIKey)));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
 }
 
 test(ReadIntFieldCase) 
@@ -159,28 +160,28 @@ test(ReadIntFieldCase)
   ThingSpeak.setField(5,"foobar"); // string
   ThingSpeak.setField(6,(float)INFINITY); // + inf
   ThingSpeak.setField(7,(float)-INFINITY); // + inf
-  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
 
   // Test read as int
   assertEqual(3,ThingSpeak.readIntField(testPrivateChannelNumber, 1, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertEqual(-47,ThingSpeak.readIntField(testPrivateChannelNumber, 2, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // Out of range
   assertEqual(OUT_OF_RANGE_OUT,ThingSpeak.readIntField(testPrivateChannelNumber, 3, testPrivateChannelReadAPIKey));  
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // NAN
   assertEqual(0,ThingSpeak.readIntField(testPrivateChannelNumber, 4, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // Text
   assertEqual(0,ThingSpeak.readIntField(testPrivateChannelNumber, 5, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // INF
   assertEqual(0,ThingSpeak.readIntField(testPrivateChannelNumber, 6, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // -INF
   assertEqual(0,ThingSpeak.readIntField(testPrivateChannelNumber, 7, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
 }
 
 test(ReadLongFieldCase) 
@@ -195,28 +196,28 @@ test(ReadLongFieldCase)
   ThingSpeak.setField(5,"foobar"); // string
   ThingSpeak.setField(6,(float)INFINITY); // + inf
   ThingSpeak.setField(7,(float)-INFINITY); // + inf
-  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
 
   // Test read as long
   assertEqual(3L,ThingSpeak.readLongField(testPrivateChannelNumber, 1, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertEqual(-47L,ThingSpeak.readLongField(testPrivateChannelNumber, 2, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // Out of range
   assertEqual(100000L,ThingSpeak.readLongField(testPrivateChannelNumber, 3, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // NAN
   assertEqual(0L,ThingSpeak.readLongField(testPrivateChannelNumber, 4, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // Text
   assertEqual(0L,ThingSpeak.readLongField(testPrivateChannelNumber, 5, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // INF
   assertEqual(0L,ThingSpeak.readLongField(testPrivateChannelNumber, 6, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // -INF
   assertEqual(0L,ThingSpeak.readLongField(testPrivateChannelNumber, 7, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
 }
 
 test(ReadStringFieldCase) 
@@ -243,29 +244,29 @@ test(ReadStringFieldCase)
   ThingSpeak.setField(5,"foobar"); // string
   ThingSpeak.setField(6,(float)INFINITY); // + inf
   ThingSpeak.setField(7,(float)-INFINITY); // + inf
-  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
 
   // Test read as long
   assertEqual(String("3.14159"),ThingSpeak.readStringField(testPrivateChannelNumber, 1, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
 
   assertEqual(String("-47"),ThingSpeak.readStringField(testPrivateChannelNumber, 2, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // Out of range
   assertEqual(String("100000"),ThingSpeak.readStringField(testPrivateChannelNumber, 3, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // NAN 
   assertEqual(String(NAN_STR),ThingSpeak.readStringField(testPrivateChannelNumber, 4, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // Text
   assertEqual(String("foobar"),ThingSpeak.readStringField(testPrivateChannelNumber, 5, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // INF
   assertEqual(String(POS_INF_STR),ThingSpeak.readStringField(testPrivateChannelNumber, 6, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   // -INF
   assertEqual(String(NEG_INF_STR),ThingSpeak.readStringField(testPrivateChannelNumber, 7, testPrivateChannelReadAPIKey));
-  assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
 }
 
 test(readStatusPublicCase)
@@ -274,8 +275,8 @@ test(readStatusPublicCase)
   delay(WRITE_DELAY_FOR_THINGSPEAK);
 
   ThingSpeak.setStatus("abcdef");
-  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPublicChannelNumber, testPublicChannelWriteAPIKey)); // string
-	//assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.writeFields(testPublicChannelNumber, testPublicChannelWriteAPIKey)); // string
+	//assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertEqual(String("abcdef"),ThingSpeak.readStatus(testPublicChannelNumber));		
 }
 
@@ -285,8 +286,8 @@ test(readStatusPrivateCase)
   delay(WRITE_DELAY_FOR_THINGSPEAK);
 
   ThingSpeak.setStatus("abcdef");
-  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
-	//assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
+	//assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertEqual(String("abcdef"),ThingSpeak.readStatus(testPrivateChannelNumber, testPrivateChannelReadAPIKey));
 }
 
@@ -296,8 +297,8 @@ test(readCreatedAtPublicCase)
   delay(WRITE_DELAY_FOR_THINGSPEAK);
 
   ThingSpeak.setCreatedAt("2016-12-21T11:11:11Z");
-  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPublicChannelNumber, testPublicChannelWriteAPIKey)); // string
-	//assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.writeFields(testPublicChannelNumber, testPublicChannelWriteAPIKey)); // string
+	//assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertEqual(String("2016-12-21T11:11:11Z"),ThingSpeak.readCreatedAt(testPublicChannelNumber));
 }
 
@@ -307,8 +308,8 @@ test(readCreatedAtPrivateCase)
   delay(WRITE_DELAY_FOR_THINGSPEAK);
 
   ThingSpeak.setCreatedAt("2016-12-21T11:11:11Z");
-  assertEqual(OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
-	//assertEqual(OK_SUCCESS,ThingSpeak.getLastReadStatus());
+  assertEqual(TS_OK_SUCCESS,ThingSpeak.writeFields(testPrivateChannelNumber, testPrivateChannelWriteAPIKey)); // string
+	//assertEqual(TS_OK_SUCCESS,ThingSpeak.getLastReadStatus());
   assertEqual(String("2016-12-21T11:11:11Z"),ThingSpeak.readCreatedAt(testPrivateChannelNumber, testPrivateChannelReadAPIKey));
 }
 
@@ -340,4 +341,3 @@ void loop()
 {
   Test::run();
 }
-

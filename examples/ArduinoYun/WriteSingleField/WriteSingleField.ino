@@ -20,12 +20,12 @@
   
   For licensing information, see the accompanying license file.
   
-  Copyright 2018, The MathWorks, Inc.
+  Copyright 2020, The MathWorks, Inc.
 */
 
-#include "ThingSpeak.h"
-#include "secrets.h"
 #include <BridgeClient.h>
+#include "secrets.h"
+#include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
 
 BridgeClient client;
 unsigned long myChannelNumber = SECRET_CH_ID;
@@ -35,7 +35,10 @@ int number = 0;
 
 void setup() {
   Serial.begin(115200);  //Initialize serial
-
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for Leonardo native USB port only
+  }
+  
   Bridge.begin();
   ThingSpeak.begin(client);  // Initialize ThingSpeak
 }

@@ -46,34 +46,35 @@ The library includes several <a href="http://github.com/mathworks/thingspeak-ard
 * **ReadField:** Reading from a public channel and a private channel on ThingSpeak.
 * **WriteSingleField:** Writing a value to a single field on ThingSpeak.
 * **WriteMultipleFields:** Writing values to multiple fields and status in one transaction with ThingSpeak.
+* **ReadMultipleFields:** Reading values from multiple fields, status, location, created-at timestamp from a public channel on ThingSpeak
+* **SecureConnect:** Using the above features and connecting securely to ThingSpeak.
 
 ## <a id="typical_write">Typical Write Example</a>
 In this case, write to a field with an ESP8266 with an incrementing number.   
 
 ```
-#include "ThingSpeak.h"
 #include <ESP8266WiFi.h>
+#include "secrets.h"
+#include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
 
-//----------------  Fill in your credentails   ---------------------
-char ssid[] = "MySSID";             // your network SSID (name) 
-char pass[] = "MyPassword";         // your network password
-unsigned long myChannelNumber = 0;  // Replace the 0 with your channel number
-const char * myWriteAPIKey = "";    // Paste your ThingSpeak Write API Key between the quotes 
-//------------------------------------------------------------------
-
+char ssid[] = SECRET_SSID;   // your network SSID (name) 
+char pass[] = SECRET_PASS;   // your network password
+int keyIndex = 0;            // your network key Index number (needed only for WEP)
 WiFiClient  client;
+
+unsigned long myChannelNumber = SECRET_CH_ID;
+const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
 
 int number = 0;
 
 void setup() {
-  //Initialize serial and wait for port to open:
-  Serial.begin(9600);
+  Serial.begin(115200);  // Initialize serial
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-
-  WiFi.mode(WIFI_STA);
-  ThingSpeak.begin(client); 
+  
+  WiFi.mode(WIFI_STA); 
+  ThingSpeak.begin(client);  // Initialize ThingSpeak
 }
 
 void loop() {
@@ -83,7 +84,7 @@ void loop() {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(SECRET_SSID);
     while(WiFi.status() != WL_CONNECTED){
-      WiFi.begin(ssid, pass);
+      WiFi.begin(ssid, pass);  // Connect to WPA/WPA2 network. Change this line if using open or WEP network
       Serial.print(".");
       delay(5000);     
     } 
@@ -93,8 +94,6 @@ void loop() {
   // Write to ThingSpeak. There are up to 8 fields in a channel, allowing you to store up to 8 different
   // pieces of information in a channel.  Here, we write to field 1.
   int x = ThingSpeak.writeField(myChannelNumber, 1, number, myWriteAPIKey);
-  
-  // Check the return code
   if(x == 200){
     Serial.println("Channel update successful.");
   }
@@ -102,12 +101,13 @@ void loop() {
     Serial.println("Problem updating channel. HTTP error code " + String(x));
   }
 
+  // change the value
   number++;
   if(number > 99){
     number = 0;
   }
   
-  delay(20000); // Wait 20 seconds before sending a new value
+  delay(20000); // Wait 20 seconds to update the channel again
 }
 ```
 
@@ -115,32 +115,32 @@ void loop() {
 In this case, read from a public channel and a private channel with an ESP8266.  The public channel is the temperature(F) at MathWorks headquarters.  The private channel is a counter that increments.
 
  ```
-#include "ThingSpeak.h"
 #include <ESP8266WiFi.h>
+#include "secrets.h"
+#include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
 
-//----------------  Fill in your credentails   ---------------------
-char ssid[] = "MySSID";     // your network SSID (name) 
-char pass[] = "MyPassword"; // your network password
-//------------------------------------------------------------------
-
+char ssid[] = SECRET_SSID;   // your network SSID (name) 
+char pass[] = SECRET_PASS;   // your network password
+int keyIndex = 0;            // your network key Index number (needed only for WEP)
 WiFiClient  client;
 
-unsigned long weatherStationChannelNumber = 12397;
+// Weather station channel details
+unsigned long weatherStationChannelNumber = SECRET_CH_ID_WEATHER_STATION;
 unsigned int temperatureFieldNumber = 4;
 
-unsigned long counterChannelNumber = 298725;
-const char * myCounterReadAPIKey = "SODG0O2UZVGKWAWG";
+// Counting channel details
+unsigned long counterChannelNumber = SECRET_CH_ID_COUNTER;
+const char * myCounterReadAPIKey = SECRET_READ_APIKEY_COUNTER;
 unsigned int counterFieldNumber = 1; 
 
 void setup() {
-  //Initialize serial and wait for port to open:
-  Serial.begin(9600);
+  Serial.begin(115200);  // Initialize serial
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-
-  WiFi.mode(WIFI_STA);  
-  ThingSpeak.begin(client);
+  
+  WiFi.mode(WIFI_STA); 
+  ThingSpeak.begin(client);  // Initialize ThingSpeak
 }
 
 void loop() {
@@ -152,7 +152,7 @@ void loop() {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(SECRET_SSID);
     while(WiFi.status() != WL_CONNECTED){
-      WiFi.begin(ssid, pass);
+      WiFi.begin(ssid, pass); // Connect to WPA/WPA2 network. Change this line if using open or WEP network
       Serial.print(".");
       delay(5000);     
     } 
@@ -193,26 +193,27 @@ void loop() {
 # <a id="documentation">Documentation</a>
 
 ## begin
-Initializes the ThingSpeak library and network settings.
+Initializes the ThingSpeak library and network settings, whether performing a secure connection or a normal connection to ThingSpeak.
 ```
 bool begin (client) // defaults to ThingSpeak.com
 ```
-```
-bool begin (client, port)
-```
+
 | Parameter      | Type         | Description                                            |          
 |----------------|:-------------|:-------------------------------------------------------|
 | client         | Client &     | TCPClient created earlier in the sketch                |
-| port           | unsigned int | Port number to use with a custom install of ThingSpeak |
 
 ### Returns
 Always returns true. This does not validate the information passed in, or generate any calls to ThingSpeak.
+
+### Remarks
+use ```#define TS_ENABLE_SSL``` before ```#include <thingspeak.h>``` so as to perform a secure connection by passing a client that is capable of doing SSL. See the note regarding secure connection below.
 
 ## writeField
 Write a value to a single field in a ThingSpeak channel.
 ```
 int writeField(channelNumber, field, value, writeAPIKey)
 ```
+
 | Parameter     | Type          | Description                                                                                     |          
 |---------------|:--------------|:------------------------------------------------------------------------------------------------|
 | channelNumber | unsigned long | Channel number                                                                                  |
@@ -235,6 +236,7 @@ Write a multi-field update. Call setField() for each of the fields you want to w
 ```
 int writeFields (channelNumber, writeAPIKey)	
 ```
+
 | Parameter     | Type          | Description                                                                                     |          
 |---------------|:--------------|:------------------------------------------------------------------------------------------------|
 | channelNumber | unsigned long | Channel number                                                                                  |
@@ -453,7 +455,7 @@ String readStatus (channelNumber, readAPIKey)
 String readStatus (channelNumber)
 ```
 
-| Parameter     | Type          | Description                                                                                    |          
+| Parameter     | Type          | Description                                                                                    |
 |---------------|:--------------|:-----------------------------------------------------------------------------------------------|
 | channelNumber | unsigned long | Channel number                                                                                 |
 | readAPIKey    | const char *  | Read API key associated with the channel. If you share code with others, do not share this key |
@@ -470,6 +472,8 @@ String readCreatedAt (channelNumber, readAPIKey)
 String readCreatedAt (channelNumber)	
 ```
 
+| Parameter     | Type          | Description                                                                                    |
+|---------------|:--------------|:-----------------------------------------------------------------------------------------------|
 | channelNumber | unsigned long | Channel number                                                                                 |
 | readAPIKey    | const char *  | Read API key associated with the channel. If you share code with others, do not share this key |
 
@@ -485,7 +489,7 @@ String readRaw (channelNumber, URLSuffix, readAPIKey)
 String readRaw	(channelNumber, URLSuffix)
 ```
 
-| Parameter     | Type          | Description                                                                                                        |          
+| Parameter     | Type          | Description                                                                                                        |
 |---------------|:--------------|:-------------------------------------------------------------------------------------------------------------------|
 | channelNumber | unsigned long | Channel number                                                                                                     |
 | URLSuffix     | String        | Raw URL to write to ThingSpeak as a String. See the documentation at https://thingspeak.com/docs/channels#get_feed |
@@ -493,6 +497,86 @@ String readRaw	(channelNumber, URLSuffix)
 
 ### Returns
 Returns the raw response from a HTTP request as a String.
+
+## readMultipleFields
+Read all the latest fields, status, location, and created-at timestamp; and store these values locally. Use ```getField``` functions mentioned below to fetch the stored values. Include the readAPIKey to read a private channel.
+```
+int readMultipleFields (channelNumber, readAPIKey)
+```
+```
+int readMultipleFields (channelNumber)
+```
+
+| Parameter     | Type          | Description                                                                                    |
+|---------------|:--------------|:-----------------------------------------------------------------------------------------------|
+| channelNumber | unsigned long | Channel number                                                                                 |
+| readAPIKey    | const char *  | Read API key associated with the channel. If you share code with others, do not share this key |
+
+### Returns
+HTTP status code of 200 if successful. See Return Codes below for other possible return values.
+
+### Remarks
+This feature not available in Arduino Uno due to memory constraints.
+
+## getFieldAsString
+Fetch the stored value from a field as String. Invoke this after invoking ```readMultipleFields```.
+```
+String getFieldAsString (field)
+```
+| Parameter     | Type          | Description                                                                                    |
+|---------------|:--------------|:-----------------------------------------------------------------------------------------------|
+| field         | unsigned int  | Field number (1-8) within the channel to read from.                                            |
+
+### Returns
+Value read (UTF8 string), empty string if there is an error, or old value read (UTF8 string) if invoked before readMultipleFields().  Use getLastReadStatus() to get more specific information.
+
+### Remarks
+This feature not available in Arduino Uno due to memory constraints.
+
+## getFieldAsFloat
+Fetch the stored value from a field as Float. Invoke this after invoking ```readMultipleFields```.
+```
+float getFieldAsFloat (field)
+```
+| Parameter     | Type          | Description                                                                                    |
+|---------------|:--------------|:-----------------------------------------------------------------------------------------------|
+| field         | unsigned int  | Field number (1-8) within the channel to read from.                                            |
+
+### Returns
+Value read, 0 if the field is text or there is an error, or old value read if invoked before readMultipleFields(). Use getLastReadStatus() to get more specific information. Note that NAN, INFINITY, and -INFINITY are valid results. 
+
+### Remarks
+This feature not available in Arduino Uno due to memory constraints.
+
+## getFieldAsLong
+Fetch the stored value from a field as Long. Invoke this after invoking ```readMultipleFields```.
+```
+long getFieldAsLong (field)
+```
+| Parameter     | Type          | Description                                                                                    |
+|---------------|:--------------|:-----------------------------------------------------------------------------------------------|
+| field         | unsigned int  | Field number (1-8) within the channel to read from.                                            |
+
+### Returns
+Value read, 0 if the field is text or there is an error, or old value read if invoked before readMultipleFields(). Use getLastReadStatus() to get more specific information.
+
+### Remarks
+This feature not available in Arduino Uno due to memory constraints.
+
+## getFieldAsInt
+Fetch the stored value from a field as Int. Invoke this after invoking ```readMultipleFields```.
+```
+int getFieldAsInt (field)
+```
+| Parameter     | Type          | Description                                                                                    |
+|---------------|:--------------|:-----------------------------------------------------------------------------------------------|
+| field         | unsigned int  | Field number (1-8) within the channel to read from.                                            |
+
+### Returns
+Value read, 0 if the field is text or there is an error, or old value read if invoked before readMultipleFields(). Use getLastReadStatus() to get more specific information.
+
+### Remarks
+This feature not available in Arduino Uno due to memory constraints.
 
 ## getLastReadStatus
 Get the status of the previous read.
@@ -504,7 +588,7 @@ int getLastReadStatus ()
 See Return Codes below for other possible return values.
 
 ## Return Codes
-| Value | Meaning                                                                                   |
+| Value | Meaning                                                                                 |
 |-------|:----------------------------------------------------------------------------------------|
 | 200   | OK / Success                                                                            |
 | 404   | Incorrect API key (or invalid ThingSpeak server address)                                |
@@ -517,6 +601,31 @@ See Return Codes below for other possible return values.
 | -304  | Timeout waiting for server to respond                                                   |
 | -401  | Point was not inserted (most probable cause is the rate limit of once every 15 seconds) |
 |    0  | Other error                                                                             |
+
+## Secure Connection
+Securely connect to ThingSpeak API to use the above features and functionalities.
+
+### HTTPS
+HTTPS ensures confidentiality as well as authenticity.
+Confidentiality: SSL Encryption using public-key cryptography.
+Authenticity: creates "trust", the device knows whether it's connected to the actual api.thingkspeak.com and not a spoof of it.
+
+### User Sketch Requirements
+Always use ```#define TS_ENABLE_SSL``` before ```#include <thingspeak.h>``` so as to perform a secure connection. If not, then the default connection would be insecured HTTP.
+
+#### Confidentiality without Authenticity
+Case 1: TS_ENABLE_SSL macro defined + Client capable of doing SSL = Secure HTTPS Connection <br>
+Case 2: TS_ENABLE_SSL macro defined + Client not capable of SSL = Defualt HTTP connection with a warning message sent to the user <br>
+Case 3: TS_ENABLE_SSL macro undefined + Client capable of doing SSL = Error connecting to ThingSpeak status code returned to user <br>
+Case 4: TS_ENABLE_SSL macro undefined + Client not capable of SSL =  HTTP connection
+
+#### Confidentiality + Authenticity
+Different client libraries have different methods of performing authenticity. <br>
+Some ways: Root Certificate Check, Certificate Fingerprint Check. <br>
+Perform the fingerprint and/or certificate check prior to invoking the ```begin()``` function. <br>
+The certificate has an expiration date associated with it, and hence it's the user's responsibility to fetch the updated certificate for the Confidentiality + Authenticity HTTPS connection to be established. <br>
+See the ReadMultipleFieldsSecure example on Fingerprint check HTTPS connection using ESP8266.
+See the ReadMultipleFieldsSecure example on Root Certificate check HTTPS connection using ESP32.
 
 ## Special Characters
 Some characters require '%XX' style URL encoding before sending to ThingSpeak.  The writeField() and writeFields() methods will perform the encoding automatically.  The writeRaw() method will not.

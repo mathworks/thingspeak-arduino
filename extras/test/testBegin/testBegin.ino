@@ -1,8 +1,8 @@
 #line 2 "testBegin.ino"
 /*
-  testWriteField unit test
+  testBegin unit test
   
-  Unit Test for the writeField function in the ThingSpeak Communication Library for Arduino
+  Unit Test for the connection through HTTP in the ThingSpeak Communication Library for Arduino
   
   This test use the ArduinoUnit 2.1.0 unit test framework.  Visit https://github.com/mmurdoch/arduinounit to learn more.
   
@@ -16,7 +16,7 @@
   
   For licensing information, see the accompanying license file.
   
-  Copyright 2018, The MathWorks, Inc.
+  Copyright 2020, The MathWorks, Inc.
 */
 
 //#define USE_WIFI101_SHIELD
@@ -28,7 +28,6 @@
 #endif
 
 #include <ArduinoUnit.h>
-#include <ThingSpeak.h>
 
 #if defined(ARDUINO_AVR_YUN)
     #include "YunClient.h"
@@ -51,50 +50,24 @@
   #endif
 #endif
 
+#include <ThingSpeak.h> // always include thingspeak header file after other header files and custom macros
 
+#define FIELD1 1
+#define WRITE_DELAY_FOR_THINGSPEAK 15000 // Data write limit for a free user (15 sec).
 
-unsigned long testChannelNumber = 209617;
-const char * testChannelWriteAPIKey = "514SX5OBP2OFEPL2";
+unsigned long testChannelNumber = 1070863;
+const char * testChannelWriteAPIKey = "UI7FSU4O8ZJ5BM8O";
 
 test(beginCase) 
 {
   assertTrue(ThingSpeak.begin(client));
 
-  assertTrue(ThingSpeak.begin(client,IPAddress(1,2,3,4),80));
+  int val = 25;
 
-  assertTrue(ThingSpeak.begin(client,"www.mathworks.com",80));
-}
-
-
-test(badAddresses) 
-{
-  // Test for valid, but incorrect, URL (www.mathworks.com)
-  assertTrue(ThingSpeak.begin(client,"www.mathworks.com",80));
-  // www.mathworks.com will sometimes sometimes return a 404 or a 301 depending on server settings.  Test the negative case instead.
-  assertNotEqual(OK_SUCCESS, ThingSpeak.writeField(testChannelNumber, 1, (float)1.0, testChannelWriteAPIKey) );
-  
-  // Test for non-existant URL (http://www.iwishthiswebsitewerereal.com/)
-  #ifdef USE_ETHERNET_SHIELD
-    int badDomainResponse = ERR_UNEXPECTED_FAIL;
-  #else
-    int badDomainResponse = ERR_CONNECT_FAILED;
-  #endif
-  assertTrue(ThingSpeak.begin(client,"www.iwishthiswebsitewerereal.com",80));
-  assertEqual(badDomainResponse, ThingSpeak.writeField(testChannelNumber, 1, (float)2.0, testChannelWriteAPIKey));
- 
-  // Test for non-existant IP 192.168.1.234
-  assertTrue(ThingSpeak.begin(client,IPAddress(192,168,1,234),80));
-  assertEqual(ERR_CONNECT_FAILED, ThingSpeak.writeField(testChannelNumber, 1, (float)2.0, testChannelWriteAPIKey));
-
-  //Test for bad suburl (badapi.thingspeak.com)
-  #ifdef USE_ETHERNET_SHIELD
-    int badURLResponse = ERR_UNEXPECTED_FAIL;
-  #else
-    int badURLResponse = ERR_CONNECT_FAILED;
-  #endif
-  assertTrue(ThingSpeak.begin(client,"invalid.thingspeak.com",80));
-  assertEqual(badURLResponse, ThingSpeak.writeField(testChannelNumber, 1, (float)4.0, testChannelWriteAPIKey));
-
+  // Always wait to ensure that rate limit isn't hit
+  delay(WRITE_DELAY_FOR_THINGSPEAK);
+  assertTrue(ThingSpeak.begin(client));
+  assertEqual(TS_OK_SUCCESS, ThingSpeak.writeField(testChannelNumber, FIELD1, val, testChannelWriteAPIKey));
 }
 
 void setup()
@@ -117,4 +90,3 @@ void loop()
 {
   Test::run();
 }
-

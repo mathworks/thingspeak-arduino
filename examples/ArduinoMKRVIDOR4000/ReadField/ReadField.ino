@@ -21,12 +21,12 @@
   
   For licensing information, see the accompanying license file.
   
-  Copyright 2018, The MathWorks, Inc.
+  Copyright 2020, The MathWorks, Inc.
 */
 
-#include "ThingSpeak.h"
 #include <WiFiNINA.h>
 #include "secrets.h"
+#include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
 
 char ssid[] = SECRET_SSID;   // your network SSID (name) 
 char pass[] = SECRET_PASS;   // your network password
@@ -44,7 +44,10 @@ unsigned int counterFieldNumber = 1;
 
 void setup() {
   Serial.begin(115200);  // Initialize serial
-  
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for Leonardo native USB port only
+  }
+    
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
     Serial.println("Communication with WiFi module failed!");
