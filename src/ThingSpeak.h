@@ -1597,7 +1597,7 @@
             // make sure all of the HTTP request is pushed out of the buffer before looking for a response
             this->client->flush();
             
-            long timeoutTime = millis() + TIMEOUT_MS_SERVERRESPONSE;
+            unsigned long timeoutTime = millis() + TIMEOUT_MS_SERVERRESPONSE;
             
             while(this->client-> available() < 17){
                 delay(2);
