@@ -9,7 +9,7 @@
   
   Copyright 2020, The MathWorks, Inc.
  
-  See the accompaning licence file for licensing information.
+  See the accompanying licence file for licensing information.
 */
 
 // #define PRINT_DEBUG_MESSAGES
@@ -446,8 +446,8 @@
         
         Notes:
         To record a status message on a write, call setStatus() then call writeFields().
-        Use status to provide additonal details when writing a channel update.
-        Additonally, status can be used by the ThingTweet App to send a message to Twitter.
+        Use status to provide additional details when writing a channel update.
+        Additionally, status can be used by the ThingTweet App to send a message to Twitter.
         */
         int setStatus(String status)
         {

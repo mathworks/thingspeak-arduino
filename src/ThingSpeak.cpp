@@ -6,7 +6,7 @@
   
   Copyright 2017, The MathWorks, Inc.
  
-  See the accompaning licence file for licensing information.
+  See the accompanying licence file for licensing information.
 */
 
 #include "ThingSpeak.h"
