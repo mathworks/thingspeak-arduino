@@ -1648,11 +1648,11 @@
                 Serial.println("Found end of header");
             #endif
             
-            timeoutTime = millis() + TIMEOUT_MS_SERVERRESPONSE;
+            currentTime = millis();
             
             while(this->client->available() < contentLength){
                 delay(2);
-                if(millis() > timeoutTime){
+                if(millis() - currentTime > TIMEOUT_MS_SERVERRESPONSE){
                     return TS_ERR_TIMEOUT;
                 }
             }
