@@ -598,7 +598,7 @@
                     if(!this->client->print("&")) return abortWriteRaw();
                 }
                 if(!this->client->print("lat=")) return abortWriteRaw();
-                if(!this->client->print(this->nextWriteLatitude)) return abortWriteRaw();
+                if(!this->client->print(this->nextWriteLatitude,6)) return abortWriteRaw();
                 fFirstItem = false;
             }
 
@@ -607,7 +607,7 @@
                     if(!this->client->print("&")) return abortWriteRaw();
                 }
                 if(!this->client->print("long=")) return abortWriteRaw();
-                if(!this->client->print(this->nextWriteLongitude)) return abortWriteRaw();
+                if(!this->client->print(this->nextWriteLongitude,6)) return abortWriteRaw();
                 fFirstItem = false;
             }
 
@@ -1360,11 +1360,11 @@
             }
             
             if(!isnan(this->nextWriteLatitude)){
-                contentLen = contentLen + 5 + String(this->nextWriteLatitude).length(); // &lat=[value]
+                contentLen = contentLen + 5 + String(this->nextWriteLatitude,6).length(); // &lat=[value]
             }
             
             if(!isnan(this->nextWriteLongitude)){
-                contentLen = contentLen + 6 + String(this->nextWriteLongitude).length(); // &long=[value]
+                contentLen = contentLen + 6 + String(this->nextWriteLongitude,6).length(); // &long=[value]
             }
             
             if(!isnan(this->nextWriteElevation)){
@@ -1597,11 +1597,11 @@
             // make sure all of the HTTP request is pushed out of the buffer before looking for a response
             this->client->flush();
             
-            long timeoutTime = millis() + TIMEOUT_MS_SERVERRESPONSE;
+            unsigned long currentTime = millis();
             
             while(this->client-> available() < 17){
                 delay(2);
-                if(millis() > timeoutTime){
+                if(millis() - currentTime > TIMEOUT_MS_SERVERRESPONSE){
                     return TS_ERR_TIMEOUT;
                 }
             }
@@ -1648,11 +1648,11 @@
                 Serial.println("Found end of header");
             #endif
             
-            timeoutTime = millis() + TIMEOUT_MS_SERVERRESPONSE;
+            currentTime = millis();
             
             while(this->client->available() < contentLength){
                 delay(2);
-                if(millis() > timeoutTime){
+                if(millis() - currentTime > TIMEOUT_MS_SERVERRESPONSE){
                     return TS_ERR_TIMEOUT;
                 }
             }
