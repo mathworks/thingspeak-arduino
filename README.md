@@ -32,9 +32,11 @@ In the Arduino IDE, choose Sketch/Include Library/Manage Libraries.  Click the T
 * Arduino MKR1000 
 * Arduino MKR1010
 * Arduino VIDOR 4000
+* Arduino R4 Uno
 * Arduino GSM 14000
 * Arduino Uno WiFi Rev2
 * Arduino Yún (Rev1 and Rev2)
+* Raspberry Pi Pico (RP2040 and RP2350)
 * ESP8266 programming directly (tested with SparkFun ESP8266 Thing - Dev Board and NodeMCU 1.0 module)
 * ESP8266 via AT commands 
 * ESP32 (tested with SparkFun ESP32 Thing)
@@ -286,7 +288,7 @@ int setField (field, value)
 HTTP status code of 200 if successful. See Return Codes below for other possible return values.
 
 ## setStatus
-Set the status of a multi-field update. Use status to provide additonal details when writing a channel update. Additionally, status can be used by the ThingTweet App to send a message to Twitter.
+Set the status of a multi-field update. Use status to provide additonal details when writing a channel update.
 ```
 int setStatus (status)	
 ```
@@ -354,25 +356,6 @@ HTTP status code of 200 if successful. See Return Codes below for other possible
 
 ### Remarks
 Timezones can be set using the timezone hour offset parameter. For example, a timestamp for Eastern Standard Time is: "2017-01-12 13:22:54-05". If no timezone hour offset parameter is used, UTC time is assumed.
-
-## setTwitterTweet
-Set the Twitter account and message to use for an update to be tweeted.
-```
-int setTwitterTweet	(twitter, tweet)	
-```
-
-| Parameter | Type         | Description                                                                      |          
-|-----------|:-------------|:---------------------------------------------------------------------------------|
-| twitter   | String       | Twitter account name as a String.                                                |
-|           | const char * | Twitter account name as a character array (zero terminated).                     |
-| tweet     | String       | Twitter message as a String (UTF-8) limited to 140 character.                    |
-|           | const char * | Twitter message as a character array (zero terminated) limited to 140 character. |
-
-### Returns
-HTTP status code of 200 if successful. See Return Codes below for other possible return values.
-
-### Remarks
-Prior to using this feature, a twitter account must be linked to your ThingSpeak account. To link your twitter account. login to ThingSpeak and go to Apps -> ThingTweet and click Link Twitter Account.
 
 ## readStringField
 Read the latest string from a channel. Include the readAPIKey to read a private channel.

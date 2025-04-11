@@ -7,9 +7,9 @@
   ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize and 
   analyze live data streams in the cloud.
   
-  Copyright 2020, The MathWorks, Inc.
+  Copyright 2020-2025, The MathWorks, Inc.
  
-  See the accompaning licence file for licensing information.
+  See the accompanying license file for licensing information.
 */
 
 // #define PRINT_DEBUG_MESSAGES
@@ -18,7 +18,7 @@
 #ifndef ThingSpeak_h
     #define ThingSpeak_h
 
-    #define TS_VER "2.0.0"
+    #define TS_VER "2.1.0"
 
     #include "Arduino.h"
     #include <Client.h>
@@ -43,12 +43,16 @@
         #define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino samd)"
     #elif defined(ARDUINO_ARCH_SAM)
         #define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino sam)"
-    #elif defined(ARDUINO_ARCH_SAMD_BETA)
-        #define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino samd_beta )"
     #elif defined(ARDUINO_ARCH_ESP32)
         #define TS_USER_AGENT "tslib-arduino/" TS_VER " (ESP32)"
-    #elif defined(ARDUINO_ARCH_SAMD_BETA)
-        #define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino vidor)"
+    #elif defined(ARDUINO_ARCH_RENESAS_UNO)
+        #define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino r4 uno)"
+    #elif defined(ARDUINO_ARCH_RENESAS_PORTENTA)
+        #define TS_USER_AGENT "tslib-arduino/" TS_VER " (arduino portenta)"
+    #elif defined(ARDUINO_ARCH_RP2040)
+        #define TS_USER_AGENT "tslib-arduino/" TS_VER " (raspberry pi rp2040)"
+    #elif defined(ARDUINO_ARCH_RP2350)
+        #define TS_USER_AGENT "tslib-arduino/" TS_VER " (raspberry pi rp2350)"
     #else
         #define TS_USER_AGENT "tslib-arduino/" TS_VER " (unknown)"
     #endif
@@ -446,8 +450,7 @@
         
         Notes:
         To record a status message on a write, call setStatus() then call writeFields().
-        Use status to provide additonal details when writing a channel update.
-        Additonally, status can be used by the ThingTweet App to send a message to Twitter.
+        Use status to provide additional details when writing a channel update.
         */
         int setStatus(String status)
         {
@@ -462,38 +465,6 @@
         }
         
 
-        /*
-        Function: setTwitterTweet
-        
-        Summary:
-        Set the Twitter account and message to use for an update to be tweeted.
-        
-        Parameters:
-        twitter - Twitter account name as a String.
-        tweet - Twitter message as a String (UTF-8) limited to 140 character.
-        
-        Returns:
-        Code of 200 if successful.
-        Code of -101 if string is too long (> 255 bytes)
-        
-        Notes:
-        To send a message to twitter call setTwitterTweet() then call writeFields().
-        Prior to using this feature, a twitter account must be linked to your ThingSpeak account. Do this by logging into ThingSpeak and going to Apps, then ThingTweet and clicking Link Twitter Account.
-        */
-        int setTwitterTweet(String twitter, String tweet){
-            #ifdef PRINT_DEBUG_MESSAGES
-                Serial.print("ts::setTwitterTweet(twitter: "); Serial.print(twitter); Serial.print(", tweet: "); Serial.print(tweet); Serial.println("\")");
-            #endif
-            // Max # bytes for ThingSpeak field is 255 (UTF-8)
-            if((twitter.length() > FIELDLENGTH_MAX) || (tweet.length() > FIELDLENGTH_MAX)) return TS_ERR_OUT_OF_RANGE;
-            
-            this->nextWriteTwitter = twitter;
-            this->nextWriteTweet = tweet;
-            
-            return TS_OK_SUCCESS;
-        }
-        
-            
         /*
         Function: setCreatedAt
         
@@ -626,24 +597,6 @@
                 }
                 if(!this->client->print("status=")) return abortWriteRaw();
                 if(!this->client->print(this->nextWriteStatus)) return abortWriteRaw();
-                fFirstItem = false;
-            }
-            
-            if(this->nextWriteTwitter.length() > 0){
-                if(!fFirstItem){
-                    if(!this->client->print("&")) return abortWriteRaw();
-                }
-                if(!this->client->print("twitter=")) return abortWriteRaw();
-                if(!this->client->print(this->nextWriteTwitter)) return abortWriteRaw();
-                fFirstItem = false;
-            }
-            
-            if(this->nextWriteTweet.length() > 0){
-                if(!fFirstItem){
-                    if(!this->client->print("&")) return abortWriteRaw();
-                }
-                if(!this->client->print("tweet=")) return abortWriteRaw();
-                if(!this->client->print(this->nextWriteTweet)) return abortWriteRaw();
                 fFirstItem = false;
             }
             
@@ -1375,14 +1328,6 @@
                 contentLen = contentLen + 8 + this->nextWriteStatus.length();	// &status=[value]
             }
             
-            if(this->nextWriteTwitter.length() > 0){
-                contentLen = contentLen + 9 + this->nextWriteTwitter.length();	// &twitter=[value]
-            }
-            
-            if(this->nextWriteTweet.length() > 0){
-                contentLen = contentLen + 7 + this->nextWriteTweet.length();	// &tweet=[value]
-            }
-            
             if(this->nextWriteCreatedAt.length() > 0){
                 contentLen = contentLen + 12 + this->nextWriteCreatedAt.length();	// &created_at=[value]
             }
@@ -1540,8 +1485,6 @@
         float nextWriteElevation;
         int lastReadStatus;
         String nextWriteStatus;
-        String nextWriteTwitter;
-        String nextWriteTweet;
         String nextWriteCreatedAt;
         #ifndef ARDUINO_AVR_UNO
             feed lastFeed;
@@ -1597,7 +1540,7 @@
             // make sure all of the HTTP request is pushed out of the buffer before looking for a response
             this->client->flush();
             
-            long timeoutTime = millis() + TIMEOUT_MS_SERVERRESPONSE;
+            unsigned long timeoutTime = millis() + TIMEOUT_MS_SERVERRESPONSE;
             
             while(this->client-> available() < 17){
                 delay(2);
@@ -1715,8 +1658,6 @@
             this->nextWriteLongitude = NAN;
             this->nextWriteElevation = NAN;
             this->nextWriteStatus = "";
-            this->nextWriteTwitter = "";
-            this->nextWriteTweet = "";
             this->nextWriteCreatedAt = "";
         }
     };
