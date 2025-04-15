@@ -2,7 +2,7 @@
 /*
   testSetField unit test
   
-  Unit Test for the writeFields and setField functions in the ThingSpeak Communication Library for Arduino along with setTwitter, setStatus and setCreatedAt functionalities.
+  Unit Test for the writeFields and setField functions in the ThingSpeak Communication Library for Arduino along with setStatus and setCreatedAt functionalities.
   
   This test use the ArduinoUnit 2.1.0 unit test framework.  Visit https://github.com/mmurdoch/arduinounit to learn more.
   
@@ -16,7 +16,7 @@
   
   For licensing information, see the accompanying license file.
   
-  Copyright 2020, The MathWorks, Inc.
+  Copyright 2020-2025, The MathWorks, Inc.
 */
 
 //#define USE_WIFI101_SHIELD
@@ -269,47 +269,6 @@ test(setFieldCase)
     assertEqual(TS_OK_SUCCESS,ThingSpeak.writeFields(testChannelNumber, testChannelWriteAPIKey));
   }
   
-  /* This test case checks for the following:
-      - emptry string values (String class and const char *)
-      - twitter handle and tweet character limits via String (positive and negative cases)
-  */
-  test(setTwitterTweetCase)
-  {
-    const char * constChar_twitter = "";
-    String string_twitter = "";
-    // Always wait to ensure that rate limit isn't hit
-    delay(WRITE_DELAY_FOR_THINGSPEAK);
-  
-    // Test empty string
-    assertEqual(TS_OK_SUCCESS, ThingSpeak.setTwitterTweet(string_twitter, string_twitter)); // First argument is the twitter handle, second argument is the tweet
-    assertEqual(TS_OK_SUCCESS, ThingSpeak.setTwitterTweet(constChar_twitter, constChar_twitter)); // First argument is the twitter handle, second argument is the tweet
-  
-    unsigned int numChar = 256;
-    String longTwitter;
-    longTwitter.reserve(numChar);
-  
-    String normalTwitter = "normalString";
-  
-    // Test twitter character limits
-    for(unsigned int i = 0; i < 255; i++)
-    {
-      longTwitter += '0';
-    }
-  
-    // longTwitter will have 256 '0' characters, since the number of characters ThingSpeak status can store is limited to 256 characters.
-    
-    assertEqual(TS_OK_SUCCESS, ThingSpeak.setTwitterTweet(longTwitter, normalTwitter)); // First argument is the twitter handle, second argument is the tweet
-    assertEqual(TS_OK_SUCCESS, ThingSpeak.setTwitterTweet(normalTwitter, longTwitter)); // First argument is the twitter handle, second argument is the tweet
-  
-    longTwitter += '0';
-  
-    // longTwitter will now have 257 '0' characters. Out of range error.
-    
-    assertEqual(TS_ERR_OUT_OF_RANGE, ThingSpeak.setTwitterTweet(longTwitter, normalTwitter)); // First argument is the twitter handle, second argument is the tweet
-    assertEqual(TS_ERR_OUT_OF_RANGE, ThingSpeak.setTwitterTweet(normalTwitter, longTwitter)); // First argument is the twitter handle, second argument is the tweet
-    
-    assertEqual(TS_OK_SUCCESS,ThingSpeak.writeFields(testChannelNumber, testChannelWriteAPIKey));
-  }
   
   /* This test case checks for the following:
       - emptry string values (String class and const char *)

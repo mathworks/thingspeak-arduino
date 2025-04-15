@@ -18,7 +18,7 @@
 #ifndef ThingSpeak_h
     #define ThingSpeak_h
 
-    #define TS_VER "2.1.0"
+    #define TS_VER "2.1.1"
 
     #include "Arduino.h"
     #include <Client.h>
