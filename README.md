@@ -259,8 +259,8 @@ int writeRaw (channelNumber, postMessage, writeAPIKey)
 | Parameter     | Type          | Description                                                                                                                                       |          
 |---------------|:--------------|:--------------------------------------------------------------------------------------------------------------------------------------------------|
 | channelNumber | unsigned long | Channel number                                                                                                                                    |
-| postMessage   | const char *  | Raw URL to write to ThingSpeak as a String. See the documentation at https://thingspeak.com/docs/channels#update_feed.                            |
-|               | String        | Raw URL to write to ThingSpeak as a character array (zero terminated). See the documentation at https://thingspeak.com/docs/channels#update_feed. | 
+| postMessage   | const char *  | Raw URL to write to ThingSpeak as a String. Refer to the [documentation](https://www.mathworks.com/help/thingspeak/channels-and-charts-api.html)                    |
+|               | String        | Raw URL to write to ThingSpeak as a character array (zero terminated). Refer to the [documentation](https://www.mathworks.com/help/thingspeak/channels-and-charts-api.html) | 
 | writeAPIKey   | const char *  | Write API key associated with the channel. If you share code with others, do not share this key                                                   |
 
 ### Returns
